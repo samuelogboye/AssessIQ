@@ -57,13 +57,17 @@ class GradingConfigurationSerializer(serializers.ModelSerializer):
             "question_text",
             "grading_service",
             "service_config",
+            "auto_grade_threshold",
+            "require_manual_review",
+            "grading_timeout",
+            "max_retries",
+            "system_prompt",
+            "grading_prompt_template",
             "is_active",
-            "priority",
-            "created_by",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "created_by"]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
     def validate(self, attrs):
         """Validate grading configuration."""
@@ -175,12 +179,6 @@ class GradingConfigurationSerializer(serializers.ModelSerializer):
                     {"service_config": "Temperature must be between 0 and 2"}
                 )
 
-    def create(self, validated_data):
-        """Set created_by to current user."""
-        validated_data["created_by"] = self.context["request"].user
-        return super().create(validated_data)
-
-
 class GradingConfigurationListSerializer(serializers.ModelSerializer):
     """Simplified serializer for listing grading configurations."""
 
@@ -196,7 +194,6 @@ class GradingConfigurationListSerializer(serializers.ModelSerializer):
             "question_text",
             "grading_service",
             "is_active",
-            "priority",
             "created_at",
         ]
 

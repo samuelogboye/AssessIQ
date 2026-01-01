@@ -99,8 +99,8 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsInstructor]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["grading_service", "scope"]
-    ordering_fields = ["priority", "created_at"]
-    ordering = ["-priority", "-created_at"]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
 
     def get_serializer_class(self):
         """Return appropriate serializer."""
@@ -111,19 +111,19 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Get grading configurations.
-        Instructors see global configs and their own.
+        Instructors see global configs and their course configs.
         """
         user = self.request.user
         queryset = GradingConfiguration.objects.select_related(
-            "exam", "question", "created_by"
+            "exam", "question"
         )
 
-        # Instructors see global configs + their own
+        # Instructors see global configs + configs for their courses
         if user.role == "instructor":
             queryset = queryset.filter(
                 Q(scope="global") |
-                Q(created_by=user) |
-                Q(exam__course__instructor=user)
+                Q(exam__course__instructor=user) |
+                Q(question__exam__course__instructor=user)
             )
 
         # Filter by scope
@@ -148,10 +148,6 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(exam_id=exam_id)
 
         return queryset
-
-    def perform_create(self, serializer):
-        """Set created_by to current user."""
-        serializer.save(created_by=self.request.user)
 
     @action(detail=False, methods=["get"])
     def services(self, request):
