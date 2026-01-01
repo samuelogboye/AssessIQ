@@ -21,6 +21,7 @@ class SubmissionAnswerSerializer(serializers.ModelSerializer):
         model = SubmissionAnswer
         fields = [
             "id",
+            "submission",
             "question",
             "answer_text",
             "created_at",
