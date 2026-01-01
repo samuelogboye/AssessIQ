@@ -390,6 +390,9 @@ class SubmissionAnswerViewSet(viewsets.ModelViewSet):
         """Validate user can create answer."""
         submission = serializer.validated_data.get("submission")
 
+        if not submission:
+            raise ValueError("Submission is required to create an answer.")
+
         if submission.student != self.request.user:
             raise PermissionError("You can only create answers for your own submissions.")
 
