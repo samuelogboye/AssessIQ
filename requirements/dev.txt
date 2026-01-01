@@ -20,5 +20,5 @@ faker==25.2.0
 werkzeug==3.0.3
 
 # Debugging
-django-debug-toolbar==4.3.0
+django-debug-toolbar==6.1.0
 ipython==8.24.0
