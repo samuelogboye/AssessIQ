@@ -29,3 +29,12 @@ python-json-logger==4.0.0
 
 whitenoise==6.11.0
 
+
+# OpenAI grading service
+openai>=1.12.0
+
+# Anthropic Claude grading service
+anthropic>=0.18.0
+
+# Google Gemini grading service
+google-generativeai>=0.4.0
