@@ -51,7 +51,8 @@ class TestUserRegistration:
         response = client.post(url, data, format='json')
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'password_confirm' in response.data
+        assert 'detail' in response.data
+        assert 'password_confirm' in response.data['detail']
 
     def test_register_duplicate_email(self):
         """Test registration with existing email."""
