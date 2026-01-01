@@ -3,9 +3,8 @@ Serializers for accounts app.
 """
 
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
@@ -94,33 +93,16 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         """Validate credentials."""
         # Convert email to lowercase
         email = attrs.get("email", "").lower()
-        password = attrs.get("password")
+        attrs["username"] = email  # TokenObtainPairSerializer expects "username"
 
-        # Get user by email
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid email or password.")
+        # Let base class handle authentication & update_last_login
+        data = super().validate(attrs)
 
-        # Check password
-        if not user.check_password(password):
-            raise serializers.ValidationError("Invalid email or password.")
+        # Add user details to response
+        data["user"] = UserSerializer(self.user).data
 
-        # Check if user is active
-        if not user.is_active:
-            raise serializers.ValidationError("This account has been deactivated.")
-
-        # Set user for token generation
-        attrs["user"] = user
-
-        # Generate tokens
-        refresh = self.get_token(user)
-
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": UserSerializer(user).data,
-        }
+        # Add custom claims (already handled in get_token)
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -183,7 +165,15 @@ class ChangePasswordSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
-        """Validate new passwords match."""
+        """Validate new passwords match and differ from old password."""
+
+        # validate new password is different from old password
+        if attrs["old_password"] == attrs["new_password"]:
+            raise serializers.ValidationError(
+                {"new_password": "New password must be different from old password."}
+            )
+        
+        # validate new passwords match
         if attrs["new_password"] != attrs["new_password_confirm"]:
             raise serializers.ValidationError(
                 {"new_password_confirm": "New passwords do not match."}
