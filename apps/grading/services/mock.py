@@ -1,6 +1,7 @@
 """
 Mock grading service using keyword matching and text similarity.
 """
+
 from typing import Dict, Any
 import logging
 from .base import BaseGradingService
@@ -22,7 +23,7 @@ class MockGradingService(BaseGradingService):
             config: Configuration dictionary
         """
         self.config = config or {}
-        self.similarity_threshold = self.config.get('similarity_threshold', 0.7)
+        self.similarity_threshold = self.config.get("similarity_threshold", 0.7)
 
     def grade(self, submission_answer) -> Dict[str, Any]:
         """
@@ -41,40 +42,32 @@ class MockGradingService(BaseGradingService):
         # Calculate score based on keywords if available
         if question.keywords:
             score, feedback = self._grade_with_keywords(
-                student_answer,
-                question.keywords,
-                question.marks,
-                question.keyword_weight
+                student_answer, question.keywords, question.marks, question.keyword_weight
             )
         else:
             # Use simple text similarity
             score, feedback = self._grade_with_similarity(
-                student_answer,
-                correct_answer,
-                question.marks
+                student_answer, correct_answer, question.marks
             )
 
         # Update the submission answer
         submission_answer.score = score
         submission_answer.feedback = feedback
-        submission_answer.graded_by = 'mock'
+        submission_answer.graded_by = "mock"
         submission_answer.grading_metadata = {
-            'method': 'mock',
-            'similarity_threshold': self.similarity_threshold,
-            'confidence': 75.0  # Mock confidence score
+            "method": "mock",
+            "similarity_threshold": self.similarity_threshold,
+            "confidence": 75.0,  # Mock confidence score
         }
         submission_answer.save()
 
         logger.info(f"Mock graded answer {submission_answer.id}: {score}/{question.marks}")
 
-        return {
-            'score': float(score),
-            'feedback': feedback,
-            'confidence': 75.0,
-            'method': 'mock'
-        }
+        return {"score": float(score), "feedback": feedback, "confidence": 75.0, "method": "mock"}
 
-    def _grade_with_keywords(self, answer: str, keywords: list, max_marks: float, weight: float) -> tuple:
+    def _grade_with_keywords(
+        self, answer: str, keywords: list, max_marks: float, weight: float
+    ) -> tuple:
         """
         Grade using keyword matching.
 
@@ -152,8 +145,8 @@ class MockGradingService(BaseGradingService):
             bool: True if configuration is valid
         """
         # Mock service has minimal configuration requirements
-        if 'similarity_threshold' in config:
-            threshold = config['similarity_threshold']
+        if "similarity_threshold" in config:
+            threshold = config["similarity_threshold"]
             if not (0 <= threshold <= 1):
                 return False
 

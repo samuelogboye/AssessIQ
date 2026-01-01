@@ -1,6 +1,7 @@
 """
 URL configuration for AssessIQ project.
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -13,27 +14,31 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     # Admin
-    path('admin/', admin.site.urls),
-
+    path("admin/", admin.site.urls),
     # API v1
-    path('api/v1/', include([
-        path('auth/', include('apps.accounts.urls')),
-        path('assessments/', include('apps.assessments.urls')),
-        path('submissions/', include('apps.submissions.urls')),
-        path('grading/', include('apps.grading.urls')),
-    ])),
-
+    path(
+        "api/v1/",
+        include(
+            [
+                path("auth/", include("apps.accounts.urls")),
+                path("assessments/", include("apps.assessments.urls")),
+                path("submissions/", include("apps.submissions.urls")),
+                path("grading/", include("apps.grading.urls")),
+            ]
+        ),
+    ),
     # API Documentation
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
 
 # Debug toolbar for development
 if settings.DEBUG:
     import debug_toolbar
+
     urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
+        path("__debug__/", include(debug_toolbar.urls)),
     ] + urlpatterns
 
 # Serve media files in development

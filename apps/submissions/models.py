@@ -2,6 +2,7 @@
 Submission models for AssessIQ.
 Handles student exam submissions and answers.
 """
+
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -16,13 +17,11 @@ class SubmissionManager(models.Manager):
 
     def get_queryset(self):
         """Optimize default queryset with select_related and prefetch_related."""
-        return super().get_queryset().select_related(
-            'student',
-            'exam',
-            'exam__course'
-        ).prefetch_related(
-            'answers',
-            'answers__question'
+        return (
+            super()
+            .get_queryset()
+            .select_related("student", "exam", "exam__course")
+            .prefetch_related("answers", "answers__question")
         )
 
     def for_student(self, student):
@@ -35,40 +34,35 @@ class SubmissionManager(models.Manager):
 
     def pending_grading(self):
         """Get submissions that are pending grading."""
-        return self.filter(status='submitted')
+        return self.filter(status="submitted")
 
     def graded(self):
         """Get graded submissions."""
-        return self.filter(status='graded')
+        return self.filter(status="graded")
 
 
 class Submission(TimeStampedModel):
     """
     Submission model representing a student's exam attempt.
     """
+
     STATUS_CHOICES = [
-        ('in_progress', 'In Progress'),
-        ('submitted', 'Submitted'),
-        ('graded', 'Graded'),
+        ("in_progress", "In Progress"),
+        ("submitted", "Submitted"),
+        ("graded", "Graded"),
     ]
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='submissions',
-        limit_choices_to={'role': 'student'}
+        related_name="submissions",
+        limit_choices_to={"role": "student"},
     )
     exam = models.ForeignKey(
-        'assessments.Exam',
-        on_delete=models.CASCADE,
-        related_name='submissions'
+        "assessments.Exam", on_delete=models.CASCADE, related_name="submissions"
     )
     attempt_number = models.PositiveIntegerField(default=1)
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='in_progress'
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="in_progress")
 
     # Timestamps
     started_at = models.DateTimeField(auto_now_add=True)
@@ -77,54 +71,39 @@ class Submission(TimeStampedModel):
 
     # Scoring
     total_score = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(0)]
+        max_digits=6, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
     )
     percentage = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         null=True,
         blank=True,
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
 
     # Flags
-    is_late = models.BooleanField(
-        default=False,
-        help_text=_('Whether submission was late')
-    )
-    flagged_for_review = models.BooleanField(
-        default=False,
-        help_text=_('Flag for manual review')
-    )
+    is_late = models.BooleanField(default=False, help_text=_("Whether submission was late"))
+    flagged_for_review = models.BooleanField(default=False, help_text=_("Flag for manual review"))
 
     # Additional metadata
     ip_address = models.GenericIPAddressField(
-        null=True,
-        blank=True,
-        help_text=_('IP address from which submission was made')
+        null=True, blank=True, help_text=_("IP address from which submission was made")
     )
-    user_agent = models.TextField(
-        blank=True,
-        help_text=_('Browser user agent string')
-    )
+    user_agent = models.TextField(blank=True, help_text=_("Browser user agent string"))
 
     objects = SubmissionManager()
 
     class Meta:
-        db_table = 'submissions'
-        verbose_name = _('submission')
-        verbose_name_plural = _('submissions')
-        ordering = ['-created_at']
-        unique_together = [['student', 'exam', 'attempt_number']]
+        db_table = "submissions"
+        verbose_name = _("submission")
+        verbose_name_plural = _("submissions")
+        ordering = ["-created_at"]
+        unique_together = [["student", "exam", "attempt_number"]]
         indexes = [
-            models.Index(fields=['student', 'exam']),
-            models.Index(fields=['exam', 'status']),
-            models.Index(fields=['status', '-created_at']),
-            models.Index(fields=['student', '-created_at']),
+            models.Index(fields=["student", "exam"]),
+            models.Index(fields=["exam", "status"]),
+            models.Index(fields=["status", "-created_at"]),
+            models.Index(fields=["student", "-created_at"]),
         ]
 
     def __str__(self):
@@ -146,37 +125,36 @@ class Submission(TimeStampedModel):
 
     def submit(self):
         """Mark submission as submitted."""
-        if self.status != 'in_progress':
-            raise ValueError(_('Only in-progress submissions can be submitted'))
+        if self.status != "in_progress":
+            raise ValueError(_("Only in-progress submissions can be submitted"))
 
-        self.status = 'submitted'
+        self.status = "submitted"
         self.submitted_at = timezone.now()
 
         # Check if late
         if self.exam.end_time and self.submitted_at > self.exam.end_time:
             self.is_late = True
 
-        self.save(update_fields=['status', 'submitted_at', 'is_late', 'updated_at'])
+        self.save(update_fields=["status", "submitted_at", "is_late", "updated_at"])
 
     def calculate_score(self):
         """Calculate total score from all answers."""
-        total = self.answers.filter(
-            score__isnull=False
-        ).aggregate(
-            total=models.Sum('score')
-        )['total'] or 0
+        total = (
+            self.answers.filter(score__isnull=False).aggregate(total=models.Sum("score"))["total"]
+            or 0
+        )
 
         self.total_score = total
         self.percentage = (total / self.exam.total_marks * 100) if self.exam.total_marks > 0 else 0
-        self.save(update_fields=['total_score', 'percentage', 'updated_at'])
+        self.save(update_fields=["total_score", "percentage", "updated_at"])
 
         return self.total_score
 
     def mark_as_graded(self):
         """Mark submission as graded."""
-        self.status = 'graded'
+        self.status = "graded"
         self.graded_at = timezone.now()
-        self.save(update_fields=['status', 'graded_at', 'updated_at'])
+        self.save(update_fields=["status", "graded_at", "updated_at"])
 
 
 class SubmissionAnswerManager(models.Manager):
@@ -184,11 +162,10 @@ class SubmissionAnswerManager(models.Manager):
 
     def get_queryset(self):
         """Optimize default queryset."""
-        return super().get_queryset().select_related(
-            'submission',
-            'submission__student',
-            'question',
-            'question__exam'
+        return (
+            super()
+            .get_queryset()
+            .select_related("submission", "submission__student", "question", "question__exam")
         )
 
     def ungraded(self):
@@ -204,19 +181,12 @@ class SubmissionAnswer(TimeStampedModel):
     """
     Individual answer for a question in a submission.
     """
-    submission = models.ForeignKey(
-        Submission,
-        on_delete=models.CASCADE,
-        related_name='answers'
-    )
+
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="answers")
     question = models.ForeignKey(
-        'assessments.Question',
-        on_delete=models.CASCADE,
-        related_name='student_answers'
+        "assessments.Question", on_delete=models.CASCADE, related_name="student_answers"
     )
-    answer_text = models.TextField(
-        help_text=_('Student\'s answer')
-    )
+    answer_text = models.TextField(help_text=_("Student's answer"))
 
     # Grading
     score = models.DecimalField(
@@ -225,41 +195,35 @@ class SubmissionAnswer(TimeStampedModel):
         null=True,
         blank=True,
         validators=[MinValueValidator(0)],
-        help_text=_('Score awarded for this answer')
+        help_text=_("Score awarded for this answer"),
     )
-    feedback = models.TextField(
-        blank=True,
-        help_text=_('Feedback from grading')
-    )
+    feedback = models.TextField(blank=True, help_text=_("Feedback from grading"))
     graded_by = models.CharField(
-        max_length=50,
-        blank=True,
-        help_text=_('Grading method: auto, ai, manual')
+        max_length=50, blank=True, help_text=_("Grading method: auto, ai, manual")
     )
     grading_metadata = models.JSONField(
         null=True,
         blank=True,
-        help_text=_('Additional grading information (confidence, keywords matched, etc.)')
+        help_text=_("Additional grading information (confidence, keywords matched, etc.)"),
     )
 
     # Flags
     requires_manual_review = models.BooleanField(
-        default=False,
-        help_text=_('Flag answer for manual review')
+        default=False, help_text=_("Flag answer for manual review")
     )
 
     objects = SubmissionAnswerManager()
 
     class Meta:
-        db_table = 'submission_answers'
-        verbose_name = _('submission answer')
-        verbose_name_plural = _('submission answers')
-        ordering = ['submission', 'question__question_number']
-        unique_together = [['submission', 'question']]
+        db_table = "submission_answers"
+        verbose_name = _("submission answer")
+        verbose_name_plural = _("submission answers")
+        ordering = ["submission", "question__question_number"]
+        unique_together = [["submission", "question"]]
         indexes = [
-            models.Index(fields=['submission', 'question']),
-            models.Index(fields=['score']),
-            models.Index(fields=['requires_manual_review']),
+            models.Index(fields=["submission", "question"]),
+            models.Index(fields=["score"]),
+            models.Index(fields=["requires_manual_review"]),
         ]
 
     def __str__(self):
@@ -277,22 +241,22 @@ class SubmissionAnswer(TimeStampedModel):
         """Calculate percentage score for this answer."""
         if self.score is None or self.question.marks == 0:
             return None
-        return (self.score / self.question.marks * 100)
+        return self.score / self.question.marks * 100
 
     def auto_grade(self):
         """
         Perform automatic grading based on question type.
         Returns True if grading was successful, False otherwise.
         """
-        if self.question.question_type == 'multiple_choice':
+        if self.question.question_type == "multiple_choice":
             return self._grade_multiple_choice()
-        elif self.question.question_type == 'true_false':
+        elif self.question.question_type == "true_false":
             return self._grade_true_false()
-        elif self.question.question_type in ['short_answer', 'essay']:
+        elif self.question.question_type in ["short_answer", "essay"]:
             if self.question.use_ai_grading:
                 # Will be handled by async grading service
                 self.requires_manual_review = True
-                self.save(update_fields=['requires_manual_review', 'updated_at'])
+                self.save(update_fields=["requires_manual_review", "updated_at"])
                 return False
             else:
                 # Use keyword matching
@@ -301,11 +265,13 @@ class SubmissionAnswer(TimeStampedModel):
 
     def _grade_multiple_choice(self):
         """Grade multiple choice question."""
-        is_correct = self.answer_text.strip().lower() == self.question.correct_answer.strip().lower()
+        is_correct = (
+            self.answer_text.strip().lower() == self.question.correct_answer.strip().lower()
+        )
         self.score = self.question.marks if is_correct else 0
-        self.graded_by = 'auto'
-        self.grading_metadata = {'method': 'exact_match', 'correct': is_correct}
-        self.save(update_fields=['score', 'graded_by', 'grading_metadata', 'updated_at'])
+        self.graded_by = "auto"
+        self.grading_metadata = {"method": "exact_match", "correct": is_correct}
+        self.save(update_fields=["score", "graded_by", "grading_metadata", "updated_at"])
         return True
 
     def _grade_true_false(self):
@@ -316,7 +282,7 @@ class SubmissionAnswer(TimeStampedModel):
         """Grade using keyword matching."""
         if not self.question.keywords:
             self.requires_manual_review = True
-            self.save(update_fields=['requires_manual_review', 'updated_at'])
+            self.save(update_fields=["requires_manual_review", "updated_at"])
             return False
 
         answer_lower = self.answer_text.lower()
@@ -327,12 +293,12 @@ class SubmissionAnswer(TimeStampedModel):
         # Apply keyword weight
         weight = float(self.question.keyword_weight)
         self.score = self.question.marks * keyword_score * weight
-        self.graded_by = 'auto_keyword'
+        self.graded_by = "auto_keyword"
         self.grading_metadata = {
-            'method': 'keyword_matching',
-            'matched_keywords': matched_keywords,
-            'keyword_score': keyword_score,
-            'weight': weight
+            "method": "keyword_matching",
+            "matched_keywords": matched_keywords,
+            "keyword_score": keyword_score,
+            "weight": weight,
         }
-        self.save(update_fields=['score', 'graded_by', 'grading_metadata', 'updated_at'])
+        self.save(update_fields=["score", "graded_by", "grading_metadata", "updated_at"])
         return True

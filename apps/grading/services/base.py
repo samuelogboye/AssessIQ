@@ -1,6 +1,7 @@
 """
 Base grading service and factory.
 """
+
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 import logging
@@ -80,8 +81,8 @@ class GradingService:
         from .mock import MockGradingService
 
         # Register default services if not already registered
-        if 'mock' not in cls._services:
-            cls.register('mock', MockGradingService)
+        if "mock" not in cls._services:
+            cls.register("mock", MockGradingService)
 
         # Determine which service to use
         service_name = settings.GRADING_SERVICE
@@ -92,22 +93,19 @@ class GradingService:
 
             try:
                 grading_config = GradingConfiguration.objects.filter(
-                    question=question,
-                    is_active=True
+                    question=question, is_active=True
                 ).first()
 
                 if not grading_config:
                     # Try exam-level config
                     grading_config = GradingConfiguration.objects.filter(
-                        exam=question.exam,
-                        is_active=True
+                        exam=question.exam, is_active=True
                     ).first()
 
                 if not grading_config:
                     # Use global config
                     grading_config = GradingConfiguration.objects.filter(
-                        scope='global',
-                        is_active=True
+                        scope="global", is_active=True
                     ).first()
 
                 if grading_config:
@@ -122,7 +120,7 @@ class GradingService:
 
         if not service_class:
             logger.warning(f"Service {service_name} not found, falling back to mock")
-            service_class = cls._services.get('mock')
+            service_class = cls._services.get("mock")
 
         # Instantiate and return service
         return service_class(config or {})

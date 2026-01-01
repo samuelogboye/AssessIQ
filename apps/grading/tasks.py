@@ -1,6 +1,7 @@
 """
 Celery tasks for automated grading.
 """
+
 from celery import shared_task
 from django.utils import timezone
 import logging
@@ -23,17 +24,19 @@ def grade_submission(self, submission_id):
     from .models import GradingTask
 
     try:
-        submission = Submission.objects.select_related('exam').prefetch_related(
-            'answers', 'answers__question'
-        ).get(id=submission_id)
+        submission = (
+            Submission.objects.select_related("exam")
+            .prefetch_related("answers", "answers__question")
+            .get(id=submission_id)
+        )
 
         # Create grading task
         task = GradingTask.objects.create(
             submission=submission,
-            grading_method='mock',  # Will be determined by configuration
+            grading_method="mock",  # Will be determined by configuration
             celery_task_id=self.request.id,
-            status='in_progress',
-            started_at=timezone.now()
+            status="in_progress",
+            started_at=timezone.now(),
         )
 
         try:
@@ -46,14 +49,16 @@ def grade_submission(self, submission_id):
             submission.mark_as_graded()
 
             # Mark task as completed
-            task.mark_completed({
-                'total_score': float(submission.total_score),
-                'percentage': float(submission.percentage),
-                'graded_answers': submission.answers.count()
-            })
+            task.mark_completed(
+                {
+                    "total_score": float(submission.total_score),
+                    "percentage": float(submission.percentage),
+                    "graded_answers": submission.answers.count(),
+                }
+            )
 
             logger.info(f"Successfully graded submission {submission_id}")
-            return {'status': 'success', 'submission_id': submission_id}
+            return {"status": "success", "submission_id": submission_id}
 
         except Exception as e:
             task.mark_failed(str(e))
@@ -83,18 +88,16 @@ def grade_answer(self, answer_id):
     from .services import GradingService
 
     try:
-        answer = SubmissionAnswer.objects.select_related(
-            'question', 'submission'
-        ).get(id=answer_id)
+        answer = SubmissionAnswer.objects.select_related("question", "submission").get(id=answer_id)
 
         # Try auto-grading first
         if answer.auto_grade():
             logger.info(f"Auto-graded answer {answer_id}")
             return {
-                'status': 'success',
-                'answer_id': answer_id,
-                'score': float(answer.score) if answer.score else 0,
-                'method': 'auto'
+                "status": "success",
+                "answer_id": answer_id,
+                "score": float(answer.score) if answer.score else 0,
+                "method": "auto",
             }
 
         # If auto-grading not applicable, use grading service
@@ -103,10 +106,10 @@ def grade_answer(self, answer_id):
 
         logger.info(f"AI-graded answer {answer_id}")
         return {
-            'status': 'success',
-            'answer_id': answer_id,
-            'score': float(answer.score) if answer.score else 0,
-            'method': 'ai'
+            "status": "success",
+            "answer_id": answer_id,
+            "score": float(answer.score) if answer.score else 0,
+            "method": "ai",
         }
 
     except SubmissionAnswer.DoesNotExist:
@@ -129,23 +132,15 @@ def bulk_grade_submissions(submission_ids):
     Returns:
         dict: Summary of grading results
     """
-    results = {
-        'total': len(submission_ids),
-        'success': 0,
-        'failed': 0,
-        'errors': []
-    }
+    results = {"total": len(submission_ids), "success": 0, "failed": 0, "errors": []}
 
     for submission_id in submission_ids:
         try:
             grade_submission.delay(submission_id)
-            results['success'] += 1
+            results["success"] += 1
         except Exception as e:
-            results['failed'] += 1
-            results['errors'].append({
-                'submission_id': submission_id,
-                'error': str(e)
-            })
+            results["failed"] += 1
+            results["errors"].append({"submission_id": submission_id, "error": str(e)})
             logger.error(f"Failed to queue grading for submission {submission_id}: {e}")
 
     return results
@@ -176,17 +171,17 @@ def regrade_submission(submission_id, regrade_all=False):
         for answer in answers:
             # Reset score and regrade
             answer.score = None
-            answer.graded_by = ''
+            answer.graded_by = ""
             answer.save()
             grade_answer.delay(answer.id)
 
         logger.info(f"Triggered regrade for submission {submission_id}, {answers.count()} answers")
         return {
-            'status': 'success',
-            'submission_id': submission_id,
-            'answers_regraded': answers.count()
+            "status": "success",
+            "submission_id": submission_id,
+            "answers_regraded": answers.count(),
         }
 
     except Submission.DoesNotExist:
         logger.error(f"Submission {submission_id} not found")
-        return {'status': 'error', 'message': 'Submission not found'}
+        return {"status": "error", "message": "Submission not found"}
