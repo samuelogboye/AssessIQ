@@ -131,8 +131,7 @@ class Exam(TimeStampedModel):
     def __str__(self):
         return f"{self.course.code} - {self.title}"
 
-    @property
-    def is_available(self):
+    def check_is_available(self):
         """Check if exam is currently available for taking."""
         if self.status != "published":
             return False
@@ -143,8 +142,7 @@ class Exam(TimeStampedModel):
             return False
         return True
 
-    @property
-    def question_count(self):
+    def get_question_count(self):
         """Get total number of questions in the exam."""
         return self.questions.count()
 

@@ -1,7 +1,19 @@
 """
 URL patterns for assessments app.
 """
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import CourseViewSet, ExamViewSet, StudentExamViewSet, QuestionViewSet
 
-from django.urls import path
+app_name = "assessments"
 
-urlpatterns = []
+# Create router for viewsets
+router = DefaultRouter()
+router.register(r"courses", CourseViewSet, basename="course")
+router.register(r"exams", ExamViewSet, basename="exam")
+router.register(r"student-exams", StudentExamViewSet, basename="student-exam")
+router.register(r"questions", QuestionViewSet, basename="question")
+
+urlpatterns = [
+    path("", include(router.urls)),
+]
