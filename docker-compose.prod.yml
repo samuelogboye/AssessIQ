@@ -1,0 +1,162 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: assessiq-db
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-assessiq}
+      - POSTGRES_USER=${POSTGRES_USER:-assessiq}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - assessiq-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-assessiq}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and Celery
+  redis:
+    image: redis:7-alpine
+    container_name: assessiq-redis
+    restart: always
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - assessiq-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: assessiq-web
+    restart: always
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput --clear &&
+             gunicorn config.wsgi:application
+             --bind 0.0.0.0:8000
+             --workers 4
+             --worker-class gthread
+             --threads 2
+             --worker-tmp-dir /dev/shm
+             --timeout 120
+             --access-logfile -
+             --error-logfile -
+             --log-level info"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    env_file:
+      - .env.prod
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+    networks:
+      - assessiq-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Celery Worker
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: assessiq-celery
+    restart: always
+    command: celery -A config worker --loglevel=info --concurrency=4
+    volumes:
+      - media_volume:/app/media
+    env_file:
+      - .env.prod
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+    networks:
+      - assessiq-network
+    depends_on:
+      - db
+      - redis
+    healthcheck:
+      test: ["CMD", "celery", "-A", "config", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: assessiq-celery-beat
+    restart: always
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - celery_beat_data:/app/celerybeat-schedule
+    env_file:
+      - .env.prod
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+    networks:
+      - assessiq-network
+    depends_on:
+      - db
+      - redis
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: assessiq-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    networks:
+      - assessiq-network
+    depends_on:
+      - web
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
+  celery_beat_data:
+    driver: local
+
+networks:
+  assessiq-network:
+    driver: bridge
