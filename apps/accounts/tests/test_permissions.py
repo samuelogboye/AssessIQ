@@ -14,7 +14,6 @@ from apps.core.permissions import (
     CanSubmitExam,
     CanViewSubmission,
     IsInstructor,
-    IsOwner,
     IsStudent,
     IsVerifiedUser,
 )

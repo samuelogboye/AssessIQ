@@ -5,7 +5,7 @@ Google Gemini based grading service.
 import json
 import logging
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any
 
 from .base import BaseGradingService
 
@@ -18,7 +18,7 @@ class GeminiGradingService(BaseGradingService):
     Supports Gemini Pro, Gemini Pro Vision, and other Gemini models.
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """
         Initialize Gemini grading service.
 
@@ -40,7 +40,7 @@ class GeminiGradingService(BaseGradingService):
 
         return getattr(settings, "GOOGLE_API_KEY", None)
 
-    def grade(self, submission_answer) -> Dict[str, Any]:
+    def grade(self, submission_answer) -> dict[str, Any]:
         """
         Grade a submission answer using Gemini.
 
@@ -229,7 +229,7 @@ Grading Guidelines:
 
         return prompt
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """
         Validate Gemini service configuration.
 

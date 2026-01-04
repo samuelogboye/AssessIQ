@@ -3,7 +3,7 @@ Mock grading service using keyword matching and text similarity.
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from .base import BaseGradingService
 
@@ -16,7 +16,7 @@ class MockGradingService(BaseGradingService):
     This is a placeholder implementation for demonstration purposes.
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """
         Initialize mock grading service.
 
@@ -26,7 +26,7 @@ class MockGradingService(BaseGradingService):
         self.config = config or {}
         self.similarity_threshold = self.config.get("similarity_threshold", 0.7)
 
-    def grade(self, submission_answer) -> Dict[str, Any]:
+    def grade(self, submission_answer) -> dict[str, Any]:
         """
         Grade a submission answer using keyword matching and similarity.
 
@@ -135,7 +135,7 @@ class MockGradingService(BaseGradingService):
 
         return round(score, 2), feedback
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """
         Validate service configuration.
 

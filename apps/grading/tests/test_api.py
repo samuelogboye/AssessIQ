@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 
 from apps.assessments.models import Course, Exam, Question
 from apps.grading.models import GradingConfiguration, GradingTask
-from apps.submissions.models import Submission, SubmissionAnswer
+from apps.submissions.models import Submission
 
 User = get_user_model()
 

@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import serializers
 
-from apps.assessments.models import Exam, Question
+from apps.assessments.models import Exam
 from apps.assessments.serializers import ExamStudentSerializer, QuestionStudentSerializer
 
 from .models import Submission, SubmissionAnswer

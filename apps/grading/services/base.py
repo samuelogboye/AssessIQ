@@ -4,7 +4,7 @@ Base grading service and factory.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class BaseGradingService(ABC):
     """
 
     @abstractmethod
-    def grade(self, submission_answer) -> Dict[str, Any]:
+    def grade(self, submission_answer) -> dict[str, Any]:
         """
         Grade a submission answer.
 
@@ -29,7 +29,7 @@ class BaseGradingService(ABC):
         pass
 
     @abstractmethod
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """
         Validate service configuration.
 

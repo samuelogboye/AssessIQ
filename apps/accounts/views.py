@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -130,7 +129,7 @@ class UserLogoutView(APIView):
             token.blacklist()
 
             return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
-        except Exception as e:
+        except Exception:
             return Response(
                 {"error": "Invalid token or token already blacklisted."},
                 status=status.HTTP_400_BAD_REQUEST,

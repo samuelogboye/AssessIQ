@@ -5,7 +5,7 @@ Claude (Anthropic) based grading service.
 import json
 import logging
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any
 
 from .base import BaseGradingService
 
@@ -18,7 +18,7 @@ class ClaudeGradingService(BaseGradingService):
     Supports Claude 3.5 Sonnet, Claude 3 Opus, and other Claude models.
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """
         Initialize Claude grading service.
 
@@ -40,7 +40,7 @@ class ClaudeGradingService(BaseGradingService):
 
         return getattr(settings, "ANTHROPIC_API_KEY", None)
 
-    def grade(self, submission_answer) -> Dict[str, Any]:
+    def grade(self, submission_answer) -> dict[str, Any]:
         """
         Grade a submission answer using Claude.
 
@@ -209,7 +209,7 @@ Grading Guidelines:
 
         return prompt
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """
         Validate Claude service configuration.
 

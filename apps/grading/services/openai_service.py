@@ -5,7 +5,7 @@ OpenAI-based grading service using GPT models.
 import json
 import logging
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any
 
 from .base import BaseGradingService
 
@@ -18,7 +18,7 @@ class OpenAIGradingService(BaseGradingService):
     Supports GPT-4, GPT-3.5-turbo, and other OpenAI models.
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """
         Initialize OpenAI grading service.
 
@@ -40,7 +40,7 @@ class OpenAIGradingService(BaseGradingService):
 
         return getattr(settings, "OPENAI_API_KEY", None)
 
-    def grade(self, submission_answer) -> Dict[str, Any]:
+    def grade(self, submission_answer) -> dict[str, Any]:
         """
         Grade a submission answer using OpenAI GPT.
 
@@ -206,7 +206,7 @@ Grading Guidelines:
 
         return prompt
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """
         Validate OpenAI service configuration.
 

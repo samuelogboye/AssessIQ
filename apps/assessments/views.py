@@ -2,7 +2,7 @@
 Views for assessments app.
 """
 
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, status, viewsets
@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.core.permissions import IsInstructor, IsInstructorOrReadOnly, IsOwner, IsStudent
+from apps.core.permissions import IsInstructor, IsInstructorOrReadOnly, IsStudent
 
 from .models import Course, Exam, Question
 from .serializers import (
@@ -22,7 +22,6 @@ from .serializers import (
     ExamStudentSerializer,
     QuestionListSerializer,
     QuestionSerializer,
-    QuestionStudentSerializer,
 )
 
 

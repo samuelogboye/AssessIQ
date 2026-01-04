@@ -2,7 +2,6 @@
 Views for submissions app.
 """
 
-from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, status, viewsets
@@ -10,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.core.permissions import CanGradeSubmission, CanViewSubmission, IsInstructor, IsStudent
+from apps.core.permissions import CanGradeSubmission, CanViewSubmission, IsStudent
 
 from .models import Submission, SubmissionAnswer
 from .serializers import (
