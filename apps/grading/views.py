@@ -6,6 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 from .models import GradingTask, GradingConfiguration
 from .serializers import (
@@ -19,6 +21,53 @@ from apps.core.permissions import IsInstructor
 from .tasks import bulk_grade_submissions
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Grading"],
+        summary="List grading tasks",
+        description="Retrieve a list of grading tasks. Instructors can view tasks for submissions in their courses.",
+        parameters=[
+            OpenApiParameter(
+                name="status",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Filter by task status",
+                enum=["pending", "in_progress", "completed", "failed"],
+            ),
+            OpenApiParameter(
+                name="method",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Filter by grading method",
+                enum=["auto", "mock", "openai", "claude", "gemini", "manual"],
+            ),
+            OpenApiParameter(
+                name="submission",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description="Filter by submission ID",
+            ),
+            OpenApiParameter(
+                name="search",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Search by student email, grading method, or status",
+            ),
+            OpenApiParameter(
+                name="ordering",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Order results by field (prefix with - for descending)",
+                enum=["started_at", "-started_at", "completed_at", "-completed_at", "status", "-status"],
+            ),
+        ],
+    ),
+    retrieve=extend_schema(
+        tags=["Grading"],
+        summary="Get grading task details",
+        description="Retrieve detailed information about a specific grading task, including duration, result data, and error messages if any.",
+    ),
+)
 class GradingTaskViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for viewing grading tasks.
@@ -67,6 +116,30 @@ class GradingTaskViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
+    @extend_schema(
+        tags=["Grading"],
+        summary="Get grading task statistics",
+        description="Retrieve statistics about grading tasks including counts by status and grading method.",
+        responses={
+            200: OpenApiExample(
+                "Statistics Response",
+                value={
+                    "total": 150,
+                    "pending": 10,
+                    "in_progress": 5,
+                    "completed": 130,
+                    "failed": 5,
+                    "by_method": {
+                        "auto": 50,
+                        "openai": 60,
+                        "claude": 30,
+                        "manual": 10,
+                    },
+                },
+                response_only=True,
+            )
+        },
+    )
     @action(detail=False, methods=["get"])
     def statistics(self, request):
         """Get grading task statistics."""
@@ -90,6 +163,104 @@ class GradingTaskViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(stats)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=["Grading"],
+        summary="List grading configurations",
+        description="Retrieve all grading configurations. Instructors can view global configurations and configurations for their courses.",
+        parameters=[
+            OpenApiParameter(
+                name="scope",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Filter by configuration scope",
+                enum=["global", "exam", "question"],
+            ),
+            OpenApiParameter(
+                name="service",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Filter by grading service",
+                enum=["mock", "openai", "claude", "gemini"],
+            ),
+            OpenApiParameter(
+                name="is_active",
+                type=OpenApiTypes.BOOL,
+                location=OpenApiParameter.QUERY,
+                description="Filter by active status",
+            ),
+            OpenApiParameter(
+                name="exam",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description="Filter by exam ID",
+            ),
+            OpenApiParameter(
+                name="search",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Search by grading service or scope",
+            ),
+        ],
+    ),
+    retrieve=extend_schema(
+        tags=["Grading"],
+        summary="Get grading configuration details",
+        description="Retrieve detailed information about a specific grading configuration.",
+    ),
+    create=extend_schema(
+        tags=["Grading"],
+        summary="Create grading configuration",
+        description="Create a new grading configuration for global, exam-level, or question-level scope.",
+        examples=[
+            OpenApiExample(
+                "OpenAI Exam Configuration",
+                value={
+                    "scope": "exam",
+                    "exam": 1,
+                    "grading_service": "openai",
+                    "service_config": {
+                        "model": "gpt-4o-mini",
+                        "temperature": 0.3,
+                        "max_tokens": 500,
+                    },
+                    "is_active": True,
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "Claude Question Configuration",
+                value={
+                    "scope": "question",
+                    "question": 42,
+                    "grading_service": "claude",
+                    "service_config": {
+                        "model": "claude-3-5-sonnet-20241022",
+                        "temperature": 0.2,
+                        "max_tokens": 1024,
+                    },
+                    "is_active": True,
+                },
+                request_only=True,
+            ),
+        ],
+    ),
+    update=extend_schema(
+        tags=["Grading"],
+        summary="Update grading configuration",
+        description="Update an existing grading configuration.",
+    ),
+    partial_update=extend_schema(
+        tags=["Grading"],
+        summary="Partially update grading configuration",
+        description="Partially update an existing grading configuration.",
+    ),
+    destroy=extend_schema(
+        tags=["Grading"],
+        summary="Delete grading configuration",
+        description="Delete a grading configuration.",
+    ),
+)
 class GradingConfigurationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing grading configurations.
@@ -149,6 +320,12 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    @extend_schema(
+        tags=["Grading"],
+        summary="Get available grading services",
+        description="Retrieve information about all available grading services including supported models, configuration options, and requirements.",
+        responses={200: GradingServiceInfoSerializer(many=True)},
+    )
     @action(detail=False, methods=["get"])
     def services(self, request):
         """Get information about available grading services."""
@@ -276,6 +453,40 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
         serializer = GradingServiceInfoSerializer(services, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        tags=["Grading"],
+        summary="Bulk grade submissions",
+        description="Trigger bulk grading for multiple submissions. Maximum 100 submissions per request. Returns a Celery task ID for tracking progress.",
+        request=BulkGradeSerializer,
+        examples=[
+            OpenApiExample(
+                "Bulk Grade Request",
+                value={
+                    "submission_ids": [1, 2, 3, 4, 5],
+                    "force_regrade": False,
+                },
+                request_only=True,
+            ),
+        ],
+        responses={
+            200: OpenApiExample(
+                "Bulk Grade Response",
+                value={
+                    "message": "Bulk grading initiated for 5 submissions",
+                    "task_id": "abc123-def456-ghi789",
+                    "submission_count": 5,
+                },
+                response_only=True,
+            ),
+            403: OpenApiExample(
+                "Permission Denied",
+                value={
+                    "error": "Some submissions not found or you don't have permission to grade them."
+                },
+                response_only=True,
+            ),
+        },
+    )
     @action(detail=False, methods=["post"])
     def bulk_grade(self, request):
         """Trigger bulk grading for multiple submissions."""
