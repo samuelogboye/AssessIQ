@@ -4,6 +4,7 @@ Script to verify that all models are working correctly.
 Run with: python manage.py shell < scripts/verify_models.py
 """
 import os
+
 import django
 
 # Setup Django
@@ -11,9 +12,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
 from django.contrib.auth import get_user_model
+
 from apps.assessments.models import Course, Exam, Question
+from apps.grading.models import GradingConfiguration, GradingTask
 from apps.submissions.models import Submission, SubmissionAnswer
-from apps.grading.models import GradingTask, GradingConfiguration
 
 User = get_user_model()
 

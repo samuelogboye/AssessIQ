@@ -2,8 +2,9 @@
 Mock grading service using keyword matching and text similarity.
 """
 
-from typing import Dict, Any
 import logging
+from typing import Any, Dict
+
 from .base import BaseGradingService
 
 logger = logging.getLogger(__name__)

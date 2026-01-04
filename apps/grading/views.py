@@ -2,28 +2,29 @@
 Views for grading app.
 """
 
-from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
     extend_schema,
     extend_schema_view,
-    OpenApiParameter,
-    OpenApiExample,
 )
-from drf_spectacular.types import OpenApiTypes
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from .models import GradingTask, GradingConfiguration
-from .serializers import (
-    GradingTaskSerializer,
-    GradingConfigurationSerializer,
-    GradingConfigurationListSerializer,
-    GradingServiceInfoSerializer,
-    BulkGradeSerializer,
-)
 from apps.core.permissions import IsInstructor
+
+from .models import GradingConfiguration, GradingTask
+from .serializers import (
+    BulkGradeSerializer,
+    GradingConfigurationListSerializer,
+    GradingConfigurationSerializer,
+    GradingServiceInfoSerializer,
+    GradingTaskSerializer,
+)
 from .tasks import bulk_grade_submissions
 
 

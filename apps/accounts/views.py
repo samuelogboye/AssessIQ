@@ -2,31 +2,31 @@
 Views for accounts app.
 """
 
-from rest_framework import status, generics, permissions
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
-from django.conf import settings
 from django.template.loader import render_to_string
-from drf_spectacular.utils import extend_schema
-from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django_ratelimit.decorators import ratelimit
+from drf_spectacular.utils import extend_schema
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .serializers import (
-    UserRegistrationSerializer,
-    UserLoginSerializer,
-    UserSerializer,
-    UserProfileSerializer,
     ChangePasswordSerializer,
-    PasswordResetRequestSerializer,
-    PasswordResetConfirmSerializer,
     EmailVerificationSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    UserLoginSerializer,
+    UserProfileSerializer,
+    UserRegistrationSerializer,
+    UserSerializer,
 )
 
 User = get_user_model()

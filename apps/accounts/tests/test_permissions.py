@@ -2,21 +2,23 @@
 Tests for custom permissions.
 """
 
+from datetime import timedelta
+
 import pytest
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework.test import APIRequestFactory
+
+from apps.assessments.models import Course, Exam
 from apps.core.permissions import (
-    IsStudent,
-    IsInstructor,
-    IsOwner,
     CanSubmitExam,
     CanViewSubmission,
+    IsInstructor,
+    IsOwner,
+    IsStudent,
     IsVerifiedUser,
 )
-from apps.assessments.models import Course, Exam
 from apps.submissions.models import Submission
-from django.utils import timezone
-from datetime import timedelta
 
 User = get_user_model()
 

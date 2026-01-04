@@ -2,10 +2,11 @@
 OpenAI-based grading service using GPT models.
 """
 
-from typing import Dict, Any
-import logging
 import json
+import logging
 from decimal import Decimal
+from typing import Any, Dict
+
 from .base import BaseGradingService
 
 logger = logging.getLogger(__name__)

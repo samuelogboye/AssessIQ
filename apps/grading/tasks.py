@@ -2,9 +2,10 @@
 Celery tasks for automated grading.
 """
 
+import logging
+
 from celery import shared_task
 from django.utils import timezone
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ def grade_submission(self, submission_id):
         dict: Grading results
     """
     from apps.submissions.models import Submission
+
     from .models import GradingTask
 
     try:
@@ -85,6 +87,7 @@ def grade_answer(self, answer_id):
         dict: Grading result for this answer
     """
     from apps.submissions.models import SubmissionAnswer
+
     from .services import GradingService
 
     try:

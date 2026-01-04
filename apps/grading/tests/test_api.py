@@ -3,12 +3,13 @@ Tests for grading API endpoints.
 """
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
-from apps.grading.models import GradingTask, GradingConfiguration
+
 from apps.assessments.models import Course, Exam, Question
+from apps.grading.models import GradingConfiguration, GradingTask
 from apps.submissions.models import Submission, SubmissionAnswer
 
 User = get_user_model()

@@ -2,8 +2,8 @@
 Custom permission classes for AssessIQ.
 """
 
-from rest_framework import permissions
 from django.utils import timezone
+from rest_framework import permissions
 
 
 class IsStudent(permissions.BasePermission):

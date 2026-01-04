@@ -2,13 +2,14 @@
 API tests for submissions app.
 """
 
+from datetime import timedelta
+
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from datetime import timedelta
 
 from apps.assessments.models import Course, Exam, Question
 from apps.submissions.models import Submission, SubmissionAnswer

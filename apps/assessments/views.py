@@ -2,31 +2,27 @@
 Views for assessments app.
 """
 
-from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
-from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from apps.core.permissions import IsInstructor, IsInstructorOrReadOnly, IsOwner, IsStudent
 
 from .models import Course, Exam, Question
 from .serializers import (
     CourseSerializer,
-    ExamSerializer,
-    ExamListSerializer,
-    ExamStudentSerializer,
-    ExamStudentListSerializer,
     ExamCreateSerializer,
-    QuestionSerializer,
+    ExamListSerializer,
+    ExamSerializer,
+    ExamStudentListSerializer,
+    ExamStudentSerializer,
     QuestionListSerializer,
+    QuestionSerializer,
     QuestionStudentSerializer,
-)
-from apps.core.permissions import (
-    IsInstructor,
-    IsInstructorOrReadOnly,
-    IsStudent,
-    IsOwner,
 )
 
 
@@ -234,8 +230,9 @@ class ExamViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def statistics(self, request, pk=None):
         """Get statistics for an exam."""
+        from django.db.models import Avg, Count, Max, Min
+
         from apps.submissions.models import Submission
-        from django.db.models import Avg, Max, Min, Count
 
         exam = self.get_object()
         submissions = Submission.objects.filter(exam=exam, status="graded")

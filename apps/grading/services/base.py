@@ -2,9 +2,9 @@
 Base grading service and factory.
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any
 import logging
+from abc import ABC, abstractmethod
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +78,7 @@ class GradingService:
             BaseGradingService: Instance of grading service
         """
         from django.conf import settings
+
         from .mock import MockGradingService
 
         # Register default services if not already registered

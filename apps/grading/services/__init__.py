@@ -4,10 +4,10 @@ Provides access to all grading service implementations.
 """
 
 from .base import BaseGradingService, GradingService
-from .mock import MockGradingService
-from .openai_service import OpenAIGradingService
 from .claude_service import ClaudeGradingService
 from .gemini_service import GeminiGradingService
+from .mock import MockGradingService
+from .openai_service import OpenAIGradingService
 
 # Register all available grading services
 GradingService.register("mock", MockGradingService)

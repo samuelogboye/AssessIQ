@@ -2,8 +2,9 @@
 Serializers for assessments app.
 """
 
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
 from .models import Course, Exam, Question
 
 User = get_user_model()

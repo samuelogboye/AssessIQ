@@ -3,8 +3,10 @@ Serializers for grading app.
 """
 
 from rest_framework import serializers
-from .models import GradingTask, GradingConfiguration
+
 from apps.submissions.serializers import SubmissionListSerializer
+
+from .models import GradingConfiguration, GradingTask
 
 
 class GradingTaskSerializer(serializers.ModelSerializer):

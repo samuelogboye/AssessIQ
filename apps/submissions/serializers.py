@@ -2,15 +2,14 @@
 Serializers for submissions app.
 """
 
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from .models import Submission, SubmissionAnswer
+from rest_framework import serializers
+
 from apps.assessments.models import Exam, Question
-from apps.assessments.serializers import (
-    QuestionStudentSerializer,
-    ExamStudentSerializer,
-)
+from apps.assessments.serializers import ExamStudentSerializer, QuestionStudentSerializer
+
+from .models import Submission, SubmissionAnswer
 
 User = get_user_model()
 

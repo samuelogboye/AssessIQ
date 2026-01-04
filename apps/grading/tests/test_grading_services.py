@@ -2,12 +2,14 @@
 Tests for grading services.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from django.contrib.auth import get_user_model
+
+from apps.assessments.models import Course, Exam, Question
 from apps.grading.services import GradingService
 from apps.grading.services.mock_service import MockGradingService
-from apps.assessments.models import Course, Exam, Question
 from apps.submissions.models import Submission, SubmissionAnswer
 
 User = get_user_model()

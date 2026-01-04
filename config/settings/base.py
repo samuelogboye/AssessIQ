@@ -4,8 +4,9 @@ Contains common settings shared across all environments.
 """
 
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
+
 import environ
 
 # Build paths inside the project

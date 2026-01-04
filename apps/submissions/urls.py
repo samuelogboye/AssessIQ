@@ -2,9 +2,10 @@
 URL patterns for submissions app.
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import SubmissionViewSet, SubmissionAnswerViewSet
+
+from .views import SubmissionAnswerViewSet, SubmissionViewSet
 
 app_name = "submissions"
 
