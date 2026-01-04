@@ -1,0 +1,4031 @@
+openapi: 3.0.3
+info:
+  title: AssessIQ API
+  version: 1.0.0
+  description:
+    "\n    **AssessIQ** is a comprehensive assessment management system\
+    \ with AI-powered grading capabilities.\n\n    ## Features\n    - User authentication\
+    \ and role-based access control (Student, Instructor, Admin)\n    - Course and\
+    \ exam management\n    - Multiple question types (Multiple Choice, True/False,\
+    \ Short Answer, Essay)\n    - AI-powered grading with OpenAI, Claude, and Gemini\n\
+    \    - Real-time submission tracking\n    - Comprehensive analytics and reporting\n\
+    \n    ## Authentication\n    This API uses JWT (JSON Web Token) authentication.\
+    \ Include the token in the Authorization header:\n    ```\n    Authorization:\
+    \ Bearer <your_token>\n    ```\n\n    ## Rate Limiting\n    - Anonymous users:\
+    \ 100 requests/hour\n    - Authenticated users: 1000 requests/hour\n    "
+  contact:
+    name: AssessIQ Support
+    email: support@assessiq.com
+  license:
+    name: MIT License
+paths:
+  /api/v1/assessments/courses/:
+    get:
+      operationId: assessments_courses_list
+      description: |-
+        ViewSet for Course model.
+        Instructors can create and manage courses.
+        Students can view active courses.
+      parameters:
+        - name: ordering
+          required: false
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - name: search
+          required: false
+          in: query
+          description: A search term.
+          schema:
+            type: string
+      tags:
+        - Assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedCourseList"
+          description: ""
+    post:
+      operationId: assessments_courses_create
+      description: |-
+        ViewSet for Course model.
+        Instructors can create and manage courses.
+        Students can view active courses.
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+          description: ""
+  /api/v1/assessments/courses/{id}/:
+    get:
+      operationId: assessments_courses_retrieve
+      description: |-
+        ViewSet for Course model.
+        Instructors can create and manage courses.
+        Students can view active courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+          description: ""
+    put:
+      operationId: assessments_courses_update
+      description: |-
+        ViewSet for Course model.
+        Instructors can create and manage courses.
+        Students can view active courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+          description: ""
+    patch:
+      operationId: assessments_courses_partial_update
+      description: |-
+        ViewSet for Course model.
+        Instructors can create and manage courses.
+        Students can view active courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedCourseRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedCourseRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedCourseRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+          description: ""
+    delete:
+      operationId: assessments_courses_destroy
+      description: |-
+        ViewSet for Course model.
+        Instructors can create and manage courses.
+        Students can view active courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "204":
+          description: No response body
+  /api/v1/assessments/courses/{id}/exams/:
+    get:
+      operationId: assessments_courses_exams_retrieve
+      description: Get all exams for a course.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+          description: ""
+  /api/v1/assessments/courses/{id}/toggle_active/:
+    post:
+      operationId: assessments_courses_toggle_active_create
+      description: Toggle course active status.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CourseRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+          description: ""
+  /api/v1/assessments/exams/:
+    get:
+      operationId: assessments_exams_list
+      description: |-
+        ViewSet for Exam model (instructor view).
+        Only instructors can create and manage exams.
+      parameters:
+        - name: ordering
+          required: false
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - name: search
+          required: false
+          in: query
+          description: A search term.
+          schema:
+            type: string
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedExamListList"
+          description: ""
+    post:
+      operationId: assessments_exams_create
+      description: |-
+        ViewSet for Exam model (instructor view).
+        Only instructors can create and manage exams.
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamCreateRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ExamCreateRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ExamCreateRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamCreate"
+          description: ""
+  /api/v1/assessments/exams/{id}/:
+    get:
+      operationId: assessments_exams_retrieve
+      description: |-
+        ViewSet for Exam model (instructor view).
+        Only instructors can create and manage exams.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+          description: ""
+    put:
+      operationId: assessments_exams_update
+      description: |-
+        ViewSet for Exam model (instructor view).
+        Only instructors can create and manage exams.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+          description: ""
+    patch:
+      operationId: assessments_exams_partial_update
+      description: |-
+        ViewSet for Exam model (instructor view).
+        Only instructors can create and manage exams.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedExamRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedExamRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedExamRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+          description: ""
+    delete:
+      operationId: assessments_exams_destroy
+      description: |-
+        ViewSet for Exam model (instructor view).
+        Only instructors can create and manage exams.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "204":
+          description: No response body
+  /api/v1/assessments/exams/{id}/archive/:
+    post:
+      operationId: assessments_exams_archive_create
+      description: Archive an exam.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+          description: ""
+  /api/v1/assessments/exams/{id}/publish/:
+    post:
+      operationId: assessments_exams_publish_create
+      description: Publish an exam.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ExamRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+          description: ""
+  /api/v1/assessments/exams/{id}/statistics/:
+    get:
+      operationId: assessments_exams_statistics_retrieve
+      description: Get statistics for an exam.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+          description: ""
+  /api/v1/assessments/exams/{id}/submissions/:
+    get:
+      operationId: assessments_exams_submissions_retrieve
+      description: Get all submissions for an exam.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exam"
+          description: ""
+  /api/v1/assessments/questions/:
+    get:
+      operationId: assessments_questions_list
+      description: |-
+        ViewSet for Question model.
+        Only instructors can create and manage questions.
+      parameters:
+        - name: ordering
+          required: false
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedQuestionListList"
+          description: ""
+    post:
+      operationId: assessments_questions_create
+      description: |-
+        ViewSet for Question model.
+        Only instructors can create and manage questions.
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+          description: ""
+  /api/v1/assessments/questions/{id}/:
+    get:
+      operationId: assessments_questions_retrieve
+      description: |-
+        ViewSet for Question model.
+        Only instructors can create and manage questions.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+          description: ""
+    put:
+      operationId: assessments_questions_update
+      description: |-
+        ViewSet for Question model.
+        Only instructors can create and manage questions.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+          description: ""
+    patch:
+      operationId: assessments_questions_partial_update
+      description: |-
+        ViewSet for Question model.
+        Only instructors can create and manage questions.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedQuestionRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedQuestionRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedQuestionRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+          description: ""
+    delete:
+      operationId: assessments_questions_destroy
+      description: |-
+        ViewSet for Question model.
+        Only instructors can create and manage questions.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "204":
+          description: No response body
+  /api/v1/assessments/questions/bulk_create/:
+    post:
+      operationId: assessments_questions_bulk_create_create
+      description: Create multiple questions at once.
+      tags:
+        - assessments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/QuestionRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+          description: ""
+  /api/v1/assessments/student-exams/:
+    get:
+      operationId: assessments_student_exams_list
+      description: Read-only ViewSet for students to view available exams.
+      parameters:
+        - name: ordering
+          required: false
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - name: search
+          required: false
+          in: query
+          description: A search term.
+          schema:
+            type: string
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedExamStudentListList"
+          description: ""
+  /api/v1/assessments/student-exams/{id}/:
+    get:
+      operationId: assessments_student_exams_retrieve
+      description: Read-only ViewSet for students to view available exams.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this exam.
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamStudent"
+          description: ""
+  /api/v1/assessments/student-exams/{id}/can_attempt/:
+    get:
+      operationId: assessments_student_exams_can_attempt_retrieve
+      description: Check if student can attempt this exam.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this exam.
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamStudent"
+          description: ""
+  /api/v1/assessments/student-exams/{id}/my_submissions/:
+    get:
+      operationId: assessments_student_exams_my_submissions_retrieve
+      description: Get user's submissions for this exam.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this exam.
+          required: true
+      tags:
+        - assessments
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamStudent"
+          description: ""
+  /api/v1/auth/change-password/:
+    post:
+      operationId: auth_change_password_create
+      description: Update user password.
+      tags:
+        - User Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Authenticate user and return tokens.
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLoginRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserLoginRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UserLoginRequest"
+        required: true
+      security:
+        - {}
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLogin"
+          description: ""
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: Blacklist refresh token.
+      tags:
+        - Authentication
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/auth/password-reset/:
+    post:
+      operationId: auth_password_reset_create
+      description: Send password reset email.
+      tags:
+        - Password Reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequestRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequestRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequestRequest"
+        required: true
+      security:
+        - jwtAuth: []
+        - {}
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasswordResetRequest"
+          description: ""
+  /api/v1/auth/password-reset/confirm/:
+    post:
+      operationId: auth_password_reset_confirm_create
+      description: Reset password with token.
+      tags:
+        - Password Reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetConfirmRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PasswordResetConfirmRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PasswordResetConfirmRequest"
+        required: true
+      security:
+        - jwtAuth: []
+        - {}
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasswordResetConfirm"
+          description: ""
+  /api/v1/auth/profile/:
+    get:
+      operationId: auth_profile_retrieve
+      description: Get or update user profile.
+      tags:
+        - User Profile
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: ""
+    put:
+      operationId: auth_profile_update
+      description: Get or update user profile.
+      tags:
+        - User Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserProfileRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UserProfileRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+          description: ""
+    patch:
+      operationId: auth_profile_partial_update
+      description: Get or update user profile.
+      tags:
+        - User Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedUserProfileRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedUserProfileRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedUserProfileRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+          description: ""
+  /api/v1/auth/register/:
+    post:
+      operationId: auth_register_create
+      description: Create new user account.
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistrationRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UserRegistrationRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UserRegistrationRequest"
+        required: true
+      security:
+        - jwtAuth: []
+        - {}
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserRegistration"
+          description: ""
+  /api/v1/auth/resend-verification/:
+    post:
+      operationId: auth_resend_verification_create
+      description: Resend verification email to user.
+      tags:
+        - Email Verification
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+        - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRefreshRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/TokenRefreshRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/TokenRefreshRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenRefresh"
+          description: ""
+  /api/v1/auth/verify-email/:
+    post:
+      operationId: auth_verify_email_create
+      description: Verify email with token.
+      tags:
+        - Email Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailVerificationRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/EmailVerificationRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/EmailVerificationRequest"
+        required: true
+      security:
+        - jwtAuth: []
+        - {}
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailVerification"
+          description: ""
+  /api/v1/grading/configurations/:
+    get:
+      operationId: grading_configurations_list
+      description:
+        Retrieve all grading configurations. Instructors can view global
+        configurations and configurations for their courses.
+      summary: List grading configurations
+      parameters:
+        - in: query
+          name: exam
+          schema:
+            type: integer
+          description: Filter by exam ID
+        - in: query
+          name: is_active
+          schema:
+            type: boolean
+          description: Filter by active status
+        - name: ordering
+          required: false
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - in: query
+          name: scope
+          schema:
+            type: string
+            enum:
+              - exam
+              - global
+              - question
+          description: Filter by configuration scope
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by grading service or scope
+        - in: query
+          name: service
+          schema:
+            type: string
+            enum:
+              - claude
+              - gemini
+              - mock
+              - openai
+          description: Filter by grading service
+      tags:
+        - Grading
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedGradingConfigurationListList"
+          description: ""
+    post:
+      operationId: grading_configurations_create
+      description:
+        Create a new grading configuration for global, exam-level, or question-level
+        scope.
+      summary: Create grading configuration
+      tags:
+        - Grading
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GradingConfigurationRequest"
+            examples:
+              OpenAIExamConfiguration:
+                value:
+                  scope: exam
+                  exam: 1
+                  grading_service: openai
+                  service_config:
+                    model: gpt-4o-mini
+                    temperature: 0.3
+                    max_tokens: 500
+                  is_active: true
+                summary: OpenAI Exam Configuration
+              ClaudeQuestionConfiguration:
+                value:
+                  scope: question
+                  question: 42
+                  grading_service: claude
+                  service_config:
+                    model: claude-3-5-sonnet-20241022
+                    temperature: 0.2
+                    max_tokens: 1024
+                  is_active: true
+                summary: Claude Question Configuration
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/GradingConfigurationRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/GradingConfigurationRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GradingConfiguration"
+          description: ""
+  /api/v1/grading/configurations/{id}/:
+    get:
+      operationId: grading_configurations_retrieve
+      description: Retrieve detailed information about a specific grading configuration.
+      summary: Get grading configuration details
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - Grading
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GradingConfiguration"
+          description: ""
+    put:
+      operationId: grading_configurations_update
+      description: Update an existing grading configuration.
+      summary: Update grading configuration
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - Grading
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GradingConfigurationRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/GradingConfigurationRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/GradingConfigurationRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GradingConfiguration"
+          description: ""
+    patch:
+      operationId: grading_configurations_partial_update
+      description: Partially update an existing grading configuration.
+      summary: Partially update grading configuration
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - Grading
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedGradingConfigurationRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedGradingConfigurationRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedGradingConfigurationRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GradingConfiguration"
+          description: ""
+    delete:
+      operationId: grading_configurations_destroy
+      description: Delete a grading configuration.
+      summary: Delete grading configuration
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - Grading
+      security:
+        - jwtAuth: []
+      responses:
+        "204":
+          description: No response body
+  /api/v1/grading/configurations/bulk_grade/:
+    post:
+      operationId: grading_configurations_bulk_grade_create
+      description:
+        Trigger bulk grading for multiple submissions. Maximum 100 submissions
+        per request. Returns a Celery task ID for tracking progress.
+      summary: Bulk grade submissions
+      tags:
+        - Grading
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkGradeRequest"
+            examples:
+              BulkGradeRequest:
+                value:
+                  submission_ids:
+                    - 1
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+                  force_regrade: false
+                summary: Bulk Grade Request
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/BulkGradeRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/BulkGradeRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ""
+        "403":
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ""
+  /api/v1/grading/configurations/services/:
+    get:
+      operationId: grading_configurations_services_list
+      description:
+        Retrieve information about all available grading services including
+        supported models, configuration options, and requirements.
+      summary: Get available grading services
+      parameters:
+        - name: ordering
+          required: false
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - name: search
+          required: false
+          in: query
+          description: A search term.
+          schema:
+            type: string
+      tags:
+        - Grading
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedGradingServiceInfoList"
+          description: ""
+  /api/v1/grading/tasks/:
+    get:
+      operationId: grading_tasks_list
+      description:
+        Retrieve a list of grading tasks. Instructors can view tasks for
+        submissions in their courses.
+      summary: List grading tasks
+      parameters:
+        - in: query
+          name: method
+          schema:
+            type: string
+            enum:
+              - auto
+              - claude
+              - gemini
+              - manual
+              - mock
+              - openai
+          description: Filter by grading method
+        - in: query
+          name: ordering
+          schema:
+            type: string
+            enum:
+              - -completed_at
+              - -started_at
+              - -status
+              - completed_at
+              - started_at
+              - status
+          description: Order results by field (prefix with - for descending)
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by student email, grading method, or status
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - completed
+              - failed
+              - in_progress
+              - pending
+          description: Filter by task status
+        - in: query
+          name: submission
+          schema:
+            type: integer
+          description: Filter by submission ID
+      tags:
+        - Grading
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedGradingTaskList"
+          description: ""
+  /api/v1/grading/tasks/{id}/:
+    get:
+      operationId: grading_tasks_retrieve
+      description:
+        Retrieve detailed information about a specific grading task, including
+        duration, result data, and error messages if any.
+      summary: Get grading task details
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - Grading
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GradingTask"
+          description: ""
+  /api/v1/grading/tasks/statistics/:
+    get:
+      operationId: grading_tasks_statistics_retrieve
+      description:
+        Retrieve statistics about grading tasks including counts by status
+        and grading method.
+      summary: Get grading task statistics
+      tags:
+        - Grading
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ""
+  /api/v1/submissions/answers/:
+    get:
+      operationId: submissions_answers_retrieve
+      description: |-
+        ViewSet for SubmissionAnswer model.
+        Allows CRUD operations on individual answers.
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+    post:
+      operationId: submissions_answers_create
+      description: |-
+        ViewSet for SubmissionAnswer model.
+        Allows CRUD operations on individual answers.
+      tags:
+        - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionAnswerRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/SubmissionAnswerRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/SubmissionAnswerRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionAnswer"
+          description: ""
+  /api/v1/submissions/answers/{id}/:
+    get:
+      operationId: submissions_answers_retrieve_2
+      description: |-
+        ViewSet for SubmissionAnswer model.
+        Allows CRUD operations on individual answers.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+    put:
+      operationId: submissions_answers_update
+      description: |-
+        ViewSet for SubmissionAnswer model.
+        Allows CRUD operations on individual answers.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionAnswerRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/SubmissionAnswerRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/SubmissionAnswerRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionAnswer"
+          description: ""
+    patch:
+      operationId: submissions_answers_partial_update
+      description: |-
+        ViewSet for SubmissionAnswer model.
+        Allows CRUD operations on individual answers.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedSubmissionAnswerRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedSubmissionAnswerRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedSubmissionAnswerRequest"
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionAnswer"
+          description: ""
+    delete:
+      operationId: submissions_answers_destroy
+      description: |-
+        ViewSet for SubmissionAnswer model.
+        Allows CRUD operations on individual answers.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "204":
+          description: No response body
+  /api/v1/submissions/answers/{id}/grade/:
+    post:
+      operationId: submissions_answers_grade_create
+      description: Grade this answer (instructors only).
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/submissions/submissions/:
+    get:
+      operationId: submissions_submissions_list
+      description: |-
+        ViewSet for Submission model.
+        Students can create and view their own submissions.
+        Instructors can view and grade submissions for their courses.
+      parameters:
+        - name: ordering
+          required: false
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+        - name: search
+          required: false
+          in: query
+          description: A search term.
+          schema:
+            type: string
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedSubmissionListList"
+          description: ""
+    post:
+      operationId: submissions_submissions_create
+      description: |-
+        ViewSet for Submission model.
+        Students can create and view their own submissions.
+        Instructors can view and grade submissions for their courses.
+      tags:
+        - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionCreateRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/SubmissionCreateRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/SubmissionCreateRequest"
+        required: true
+      security:
+        - jwtAuth: []
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionCreate"
+          description: ""
+  /api/v1/submissions/submissions/{id}/:
+    get:
+      operationId: submissions_submissions_retrieve
+      description: |-
+        ViewSet for Submission model.
+        Students can create and view their own submissions.
+        Instructors can view and grade submissions for their courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+    put:
+      operationId: submissions_submissions_update
+      description: |-
+        ViewSet for Submission model.
+        Students can create and view their own submissions.
+        Instructors can view and grade submissions for their courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+    patch:
+      operationId: submissions_submissions_partial_update
+      description: |-
+        ViewSet for Submission model.
+        Students can create and view their own submissions.
+        Instructors can view and grade submissions for their courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+    delete:
+      operationId: submissions_submissions_destroy
+      description: |-
+        ViewSet for Submission model.
+        Students can create and view their own submissions.
+        Instructors can view and grade submissions for their courses.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "204":
+          description: No response body
+  /api/v1/submissions/submissions/{id}/answers/{answer_id}/grade/:
+    post:
+      operationId: submissions_submissions_answers_grade_create
+      description: Manually grade a specific answer.
+      parameters:
+        - in: path
+          name: answer_id
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/submissions/submissions/{id}/auto_grade/:
+    post:
+      operationId: submissions_submissions_auto_grade_create
+      description: Trigger auto-grading for a submission.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/submissions/submissions/{id}/bulk_grade/:
+    post:
+      operationId: submissions_submissions_bulk_grade_create
+      description: Grade multiple answers at once.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/submissions/submissions/{id}/review/:
+    get:
+      operationId: submissions_submissions_review_retrieve
+      description: Get detailed review of submission with all answers.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/submissions/submissions/{id}/save_answer/:
+    post:
+      operationId: submissions_submissions_save_answer_create
+      description: Save or update a single answer without submitting.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/submissions/submissions/{id}/submit_answers/:
+    post:
+      operationId: submissions_submissions_submit_answers_create
+      description: Submit answers for a submission.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+  /api/v1/submissions/submissions/pending_grading/:
+    get:
+      operationId: submissions_submissions_pending_grading_retrieve
+      description: Get all submissions pending grading (instructors only).
+      tags:
+        - submissions
+      security:
+        - jwtAuth: []
+      responses:
+        "200":
+          description: No response body
+components:
+  schemas:
+    BulkGradeRequest:
+      type: object
+      description: Serializer for bulk grading request.
+      properties:
+        submission_ids:
+          type: array
+          items:
+            type: integer
+        force_regrade:
+          type: boolean
+          default: false
+      required:
+        - submission_ids
+    ChangePasswordRequest:
+      type: object
+      description: Serializer for password change.
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+        - new_password
+        - new_password_confirm
+        - old_password
+    Course:
+      type: object
+      description: Serializer for Course model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          description: Unique course code (e.g., CS101)
+          maxLength: 20
+        name:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        instructor:
+          allOf:
+            - $ref: "#/components/schemas/Instructor"
+          readOnly: true
+        is_active:
+          type: boolean
+        exam_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - code
+        - created_at
+        - exam_count
+        - id
+        - instructor
+        - name
+        - updated_at
+    CourseRequest:
+      type: object
+      description: Serializer for Course model.
+      properties:
+        code:
+          type: string
+          minLength: 1
+          description: Unique course code (e.g., CS101)
+          maxLength: 20
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        instructor_id:
+          type: integer
+          writeOnly: true
+        is_active:
+          type: boolean
+      required:
+        - code
+        - instructor_id
+        - name
+    EmailVerification:
+      type: object
+      description: Serializer for email verification.
+      properties:
+        token:
+          type: string
+        uidb64:
+          type: string
+      required:
+        - token
+        - uidb64
+    EmailVerificationRequest:
+      type: object
+      description: Serializer for email verification.
+      properties:
+        token:
+          type: string
+          minLength: 1
+        uidb64:
+          type: string
+          minLength: 1
+      required:
+        - token
+        - uidb64
+    Exam:
+      type: object
+      description: Full serializer for Exam model (instructor view).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        course:
+          allOf:
+            - $ref: "#/components/schemas/Course"
+          readOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        calculated_total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        status:
+          enum:
+            - draft
+            - published
+            - archived
+          type: string
+          description: |-
+            * `draft` - Draft
+            * `published` - Published
+            * `archived` - Archived
+          x-spec-enum-id: 3999cf41a064d13a
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        instructions:
+          type: string
+          description: Instructions for students
+        allow_review:
+          type: boolean
+          description: Allow students to review their submissions
+        shuffle_questions:
+          type: boolean
+          description: Randomize question order for each student
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Question"
+          readOnly: true
+        question_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - calculated_total_marks
+        - course
+        - created_at
+        - duration_minutes
+        - id
+        - question_count
+        - questions
+        - title
+        - updated_at
+    ExamCreate:
+      type: object
+      description: Serializer for creating exams with questions.
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        course:
+          type: integer
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        status:
+          enum:
+            - draft
+            - published
+            - archived
+          type: string
+          description: |-
+            * `draft` - Draft
+            * `published` - Published
+            * `archived` - Archived
+          x-spec-enum-id: 3999cf41a064d13a
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        instructions:
+          type: string
+          description: Instructions for students
+        allow_review:
+          type: boolean
+          description: Allow students to review their submissions
+        shuffle_questions:
+          type: boolean
+          description: Randomize question order for each student
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/NestedQuestion"
+      required:
+        - course
+        - duration_minutes
+        - title
+    ExamCreateRequest:
+      type: object
+      description: Serializer for creating exams with questions.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        course:
+          type: integer
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        status:
+          enum:
+            - draft
+            - published
+            - archived
+          type: string
+          description: |-
+            * `draft` - Draft
+            * `published` - Published
+            * `archived` - Archived
+          x-spec-enum-id: 3999cf41a064d13a
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        instructions:
+          type: string
+          description: Instructions for students
+        allow_review:
+          type: boolean
+          description: Allow students to review their submissions
+        shuffle_questions:
+          type: boolean
+          description: Randomize question order for each student
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/NestedQuestionRequest"
+      required:
+        - course
+        - duration_minutes
+        - title
+    ExamList:
+      type: object
+      description: Simplified serializer for listing exams.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        course:
+          allOf:
+            - $ref: "#/components/schemas/Course"
+          readOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        status:
+          enum:
+            - draft
+            - published
+            - archived
+          type: string
+          description: |-
+            * `draft` - Draft
+            * `published` - Published
+            * `archived` - Archived
+          x-spec-enum-id: 3999cf41a064d13a
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        question_count:
+          type: integer
+          readOnly: true
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - course
+        - created_at
+        - duration_minutes
+        - id
+        - question_count
+        - title
+    ExamRequest:
+      type: object
+      description: Full serializer for Exam model (instructor view).
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        course_id:
+          type: integer
+          writeOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        status:
+          enum:
+            - draft
+            - published
+            - archived
+          type: string
+          description: |-
+            * `draft` - Draft
+            * `published` - Published
+            * `archived` - Archived
+          x-spec-enum-id: 3999cf41a064d13a
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        instructions:
+          type: string
+          description: Instructions for students
+        allow_review:
+          type: boolean
+          description: Allow students to review their submissions
+        shuffle_questions:
+          type: boolean
+          description: Randomize question order for each student
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+      required:
+        - course_id
+        - duration_minutes
+        - title
+    ExamStudent:
+      type: object
+      description: Serializer for exams visible to students.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        course:
+          allOf:
+            - $ref: "#/components/schemas/Course"
+          readOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        instructions:
+          type: string
+          description: Instructions for students
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionStudent"
+          readOnly: true
+        question_count:
+          type: integer
+          readOnly: true
+        is_available:
+          type: boolean
+          readOnly: true
+      required:
+        - course
+        - duration_minutes
+        - id
+        - is_available
+        - question_count
+        - questions
+        - title
+    ExamStudentList:
+      type: object
+      description: Simplified serializer for students listing exams.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        course:
+          allOf:
+            - $ref: "#/components/schemas/Course"
+          readOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+        question_count:
+          type: integer
+          readOnly: true
+        is_available:
+          type: boolean
+          readOnly: true
+      required:
+        - course
+        - duration_minutes
+        - id
+        - is_available
+        - question_count
+        - title
+    GradingConfiguration:
+      type: object
+      description: Serializer for Grading Configuration model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        scope:
+          enum:
+            - global
+            - exam
+            - question
+          type: string
+          description: |-
+            * `global` - Global
+            * `exam` - Exam-specific
+            * `question` - Question-specific
+          x-spec-enum-id: 14490336ff003645
+        exam:
+          type: integer
+          nullable: true
+        exam_title:
+          type: string
+          readOnly: true
+        question:
+          type: integer
+          nullable: true
+        question_text:
+          type: string
+          readOnly: true
+        grading_service:
+          type: string
+          description: "Grading service to use: mock, openai, claude, gemini"
+          maxLength: 20
+        service_config:
+          description: Service-specific configuration (model, temperature, etc.)
+        auto_grade_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Confidence threshold for auto-grading (0-100)
+        require_manual_review:
+          type: boolean
+          description: Always require manual review regardless of confidence
+        grading_timeout:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Grading timeout in seconds
+        max_retries:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum retry attempts for failed grading
+        system_prompt:
+          type: string
+          description: System prompt template for LLM grading
+        grading_prompt_template:
+          type: string
+          description: Grading prompt template with placeholders
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - created_at
+        - exam_title
+        - id
+        - question_text
+        - updated_at
+    GradingConfigurationList:
+      type: object
+      description: Simplified serializer for listing grading configurations.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        scope:
+          enum:
+            - global
+            - exam
+            - question
+          type: string
+          description: |-
+            * `global` - Global
+            * `exam` - Exam-specific
+            * `question` - Question-specific
+          x-spec-enum-id: 14490336ff003645
+        exam_title:
+          type: string
+          readOnly: true
+        question_text:
+          type: string
+          readOnly: true
+        grading_service:
+          type: string
+          description: "Grading service to use: mock, openai, claude, gemini"
+          maxLength: 20
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - created_at
+        - exam_title
+        - id
+        - question_text
+    GradingConfigurationRequest:
+      type: object
+      description: Serializer for Grading Configuration model.
+      properties:
+        scope:
+          enum:
+            - global
+            - exam
+            - question
+          type: string
+          description: |-
+            * `global` - Global
+            * `exam` - Exam-specific
+            * `question` - Question-specific
+          x-spec-enum-id: 14490336ff003645
+        exam:
+          type: integer
+          nullable: true
+        question:
+          type: integer
+          nullable: true
+        grading_service:
+          type: string
+          minLength: 1
+          description: "Grading service to use: mock, openai, claude, gemini"
+          maxLength: 20
+        service_config:
+          description: Service-specific configuration (model, temperature, etc.)
+        auto_grade_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Confidence threshold for auto-grading (0-100)
+        require_manual_review:
+          type: boolean
+          description: Always require manual review regardless of confidence
+        grading_timeout:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Grading timeout in seconds
+        max_retries:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum retry attempts for failed grading
+        system_prompt:
+          type: string
+          description: System prompt template for LLM grading
+        grading_prompt_template:
+          type: string
+          description: Grading prompt template with placeholders
+        is_active:
+          type: boolean
+    GradingServiceInfo:
+      type: object
+      description: Serializer for grading service information.
+      properties:
+        name:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        requires_api_key:
+          type: boolean
+        supported_models:
+          type: array
+          items:
+            type: string
+        default_model:
+          type: string
+        configuration_options:
+          type: object
+          additionalProperties: {}
+      required:
+        - configuration_options
+        - default_model
+        - description
+        - display_name
+        - name
+        - requires_api_key
+        - supported_models
+    GradingTask:
+      type: object
+      description: Serializer for Grading Task model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        submission:
+          allOf:
+            - $ref: "#/components/schemas/SubmissionList"
+          readOnly: true
+        submission_answer:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Specific answer being graded (if applicable)
+        grading_method:
+          enum:
+            - mock
+            - openai
+            - claude
+            - gemini
+            - manual
+          type: string
+          description: |-
+            * `mock` - Mock Grading
+            * `openai` - OpenAI GPT
+            * `claude` - Anthropic Claude
+            * `gemini` - Google Gemini
+            * `manual` - Manual Grading
+          x-spec-enum-id: 529863a6dd02510e
+          readOnly: true
+        status:
+          enum:
+            - pending
+            - in_progress
+            - completed
+            - failed
+          type: string
+          description: |-
+            * `pending` - Pending
+            * `in_progress` - In Progress
+            * `completed` - Completed
+            * `failed` - Failed
+          x-spec-enum-id: f6456bcd4242b50c
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        celery_task_id:
+          type: string
+          readOnly: true
+          description: Celery task ID for tracking
+        result:
+          readOnly: true
+          nullable: true
+          description: Grading result data
+        error_message:
+          type: string
+          readOnly: true
+          description: Error message if grading failed
+        retry_count:
+          type: integer
+          readOnly: true
+        max_retries:
+          type: integer
+          readOnly: true
+        duration:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - celery_task_id
+        - completed_at
+        - created_at
+        - duration
+        - error_message
+        - grading_method
+        - id
+        - max_retries
+        - result
+        - retry_count
+        - started_at
+        - status
+        - submission
+        - submission_answer
+        - updated_at
+    Instructor:
+      type: object
+      description: Serializer for instructor details.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+      required:
+        - email
+        - first_name
+        - full_name
+        - id
+        - last_name
+    NestedQuestion:
+      type: object
+      description:
+        Serializer for creating questions within an exam (no exam field
+        required).
+      properties:
+        question_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        question_type:
+          enum:
+            - multiple_choice
+            - short_answer
+            - essay
+            - true_false
+          type: string
+          description: |-
+            * `multiple_choice` - Multiple Choice
+            * `short_answer` - Short Answer
+            * `essay` - Essay
+            * `true_false` - True/False
+          x-spec-enum-id: d9c2cc41009782f3
+        question_text:
+          type: string
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        options:
+          nullable: true
+          description: JSON array of options for multiple choice questions
+        correct_answer:
+          type: string
+          description: Correct answer or answer key
+        acceptable_answers:
+          nullable: true
+          description: JSON array of acceptable alternative answers
+        use_ai_grading:
+          type: boolean
+          description: Use AI/LLM for grading this question
+        grading_rubric:
+          type: string
+          description: Grading rubric for AI or manual grading
+        keywords:
+          nullable: true
+          description: Keywords for automated grading
+        keyword_weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          description: Weight of keyword matching in grading (0-1)
+      required:
+        - correct_answer
+        - question_number
+        - question_text
+        - question_type
+    NestedQuestionRequest:
+      type: object
+      description:
+        Serializer for creating questions within an exam (no exam field
+        required).
+      properties:
+        question_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        question_type:
+          enum:
+            - multiple_choice
+            - short_answer
+            - essay
+            - true_false
+          type: string
+          description: |-
+            * `multiple_choice` - Multiple Choice
+            * `short_answer` - Short Answer
+            * `essay` - Essay
+            * `true_false` - True/False
+          x-spec-enum-id: d9c2cc41009782f3
+        question_text:
+          type: string
+          minLength: 1
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        options:
+          nullable: true
+          description: JSON array of options for multiple choice questions
+        correct_answer:
+          type: string
+          minLength: 1
+          description: Correct answer or answer key
+        acceptable_answers:
+          nullable: true
+          description: JSON array of acceptable alternative answers
+        use_ai_grading:
+          type: boolean
+          description: Use AI/LLM for grading this question
+        grading_rubric:
+          type: string
+          description: Grading rubric for AI or manual grading
+        keywords:
+          nullable: true
+          description: Keywords for automated grading
+        keyword_weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          description: Weight of keyword matching in grading (0-1)
+      required:
+        - correct_answer
+        - question_number
+        - question_text
+        - question_type
+    PaginatedCourseList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Course"
+    PaginatedExamListList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamList"
+    PaginatedExamStudentListList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamStudentList"
+    PaginatedGradingConfigurationListList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/GradingConfigurationList"
+    PaginatedGradingServiceInfoList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/GradingServiceInfo"
+    PaginatedGradingTaskList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/GradingTask"
+    PaginatedQuestionListList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionList"
+    PaginatedSubmissionListList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubmissionList"
+    PasswordResetConfirm:
+      type: object
+      description: Serializer for password reset confirmation.
+      properties:
+        token:
+          type: string
+        uidb64:
+          type: string
+      required:
+        - token
+        - uidb64
+    PasswordResetConfirmRequest:
+      type: object
+      description: Serializer for password reset confirmation.
+      properties:
+        token:
+          type: string
+          minLength: 1
+        uidb64:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+        - new_password
+        - new_password_confirm
+        - token
+        - uidb64
+    PasswordResetRequest:
+      type: object
+      description: Serializer for password reset request.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+    PasswordResetRequestRequest:
+      type: object
+      description: Serializer for password reset request.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+        - email
+    PatchedCourseRequest:
+      type: object
+      description: Serializer for Course model.
+      properties:
+        code:
+          type: string
+          minLength: 1
+          description: Unique course code (e.g., CS101)
+          maxLength: 20
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        instructor_id:
+          type: integer
+          writeOnly: true
+        is_active:
+          type: boolean
+    PatchedExamRequest:
+      type: object
+      description: Full serializer for Exam model (instructor view).
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+        course_id:
+          type: integer
+          writeOnly: true
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Exam duration in minutes
+        total_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        passing_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        status:
+          enum:
+            - draft
+            - published
+            - archived
+          type: string
+          description: |-
+            * `draft` - Draft
+            * `published` - Published
+            * `archived` - Archived
+          x-spec-enum-id: 3999cf41a064d13a
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability start time
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+          description: Exam availability end time
+        instructions:
+          type: string
+          description: Instructions for students
+        allow_review:
+          type: boolean
+          description: Allow students to review their submissions
+        shuffle_questions:
+          type: boolean
+          description: Randomize question order for each student
+        max_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum number of attempts allowed
+    PatchedGradingConfigurationRequest:
+      type: object
+      description: Serializer for Grading Configuration model.
+      properties:
+        scope:
+          enum:
+            - global
+            - exam
+            - question
+          type: string
+          description: |-
+            * `global` - Global
+            * `exam` - Exam-specific
+            * `question` - Question-specific
+          x-spec-enum-id: 14490336ff003645
+        exam:
+          type: integer
+          nullable: true
+        question:
+          type: integer
+          nullable: true
+        grading_service:
+          type: string
+          minLength: 1
+          description: "Grading service to use: mock, openai, claude, gemini"
+          maxLength: 20
+        service_config:
+          description: Service-specific configuration (model, temperature, etc.)
+        auto_grade_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Confidence threshold for auto-grading (0-100)
+        require_manual_review:
+          type: boolean
+          description: Always require manual review regardless of confidence
+        grading_timeout:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Grading timeout in seconds
+        max_retries:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Maximum retry attempts for failed grading
+        system_prompt:
+          type: string
+          description: System prompt template for LLM grading
+        grading_prompt_template:
+          type: string
+          description: Grading prompt template with placeholders
+        is_active:
+          type: boolean
+    PatchedQuestionRequest:
+      type: object
+      description: Serializer for Question model.
+      properties:
+        exam:
+          type: integer
+        question_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        question_type:
+          enum:
+            - multiple_choice
+            - short_answer
+            - essay
+            - true_false
+          type: string
+          description: |-
+            * `multiple_choice` - Multiple Choice
+            * `short_answer` - Short Answer
+            * `essay` - Essay
+            * `true_false` - True/False
+          x-spec-enum-id: d9c2cc41009782f3
+        question_text:
+          type: string
+          minLength: 1
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        options:
+          nullable: true
+          description: JSON array of options for multiple choice questions
+        correct_answer:
+          type: string
+          minLength: 1
+          description: Correct answer or answer key
+        acceptable_answers:
+          nullable: true
+          description: JSON array of acceptable alternative answers
+        use_ai_grading:
+          type: boolean
+          description: Use AI/LLM for grading this question
+        grading_rubric:
+          type: string
+          description: Grading rubric for AI or manual grading
+        keywords:
+          nullable: true
+          description: Keywords for automated grading
+        keyword_weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          description: Weight of keyword matching in grading (0-1)
+    PatchedSubmissionAnswerRequest:
+      type: object
+      description: Serializer for creating/updating submission answers.
+      properties:
+        submission:
+          type: integer
+        question:
+          type: integer
+        answer_text:
+          type: string
+          minLength: 1
+          description: Student's answer
+    PatchedUserProfileRequest:
+      type: object
+      description: Serializer for user profile updates.
+      properties:
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+    Question:
+      type: object
+      description: Serializer for Question model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        exam:
+          type: integer
+        question_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        question_type:
+          enum:
+            - multiple_choice
+            - short_answer
+            - essay
+            - true_false
+          type: string
+          description: |-
+            * `multiple_choice` - Multiple Choice
+            * `short_answer` - Short Answer
+            * `essay` - Essay
+            * `true_false` - True/False
+          x-spec-enum-id: d9c2cc41009782f3
+        question_text:
+          type: string
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        options:
+          nullable: true
+          description: JSON array of options for multiple choice questions
+        correct_answer:
+          type: string
+          description: Correct answer or answer key
+        acceptable_answers:
+          nullable: true
+          description: JSON array of acceptable alternative answers
+        use_ai_grading:
+          type: boolean
+          description: Use AI/LLM for grading this question
+        grading_rubric:
+          type: string
+          description: Grading rubric for AI or manual grading
+        keywords:
+          nullable: true
+          description: Keywords for automated grading
+        keyword_weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          description: Weight of keyword matching in grading (0-1)
+      required:
+        - correct_answer
+        - exam
+        - id
+        - question_number
+        - question_text
+        - question_type
+    QuestionList:
+      type: object
+      description: Simplified serializer for listing questions (without answers).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        question_type:
+          enum:
+            - multiple_choice
+            - short_answer
+            - essay
+            - true_false
+          type: string
+          description: |-
+            * `multiple_choice` - Multiple Choice
+            * `short_answer` - Short Answer
+            * `essay` - Essay
+            * `true_false` - True/False
+          x-spec-enum-id: d9c2cc41009782f3
+        question_text:
+          type: string
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        options:
+          nullable: true
+          description: JSON array of options for multiple choice questions
+      required:
+        - id
+        - question_number
+        - question_text
+        - question_type
+    QuestionRequest:
+      type: object
+      description: Serializer for Question model.
+      properties:
+        exam:
+          type: integer
+        question_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        question_type:
+          enum:
+            - multiple_choice
+            - short_answer
+            - essay
+            - true_false
+          type: string
+          description: |-
+            * `multiple_choice` - Multiple Choice
+            * `short_answer` - Short Answer
+            * `essay` - Essay
+            * `true_false` - True/False
+          x-spec-enum-id: d9c2cc41009782f3
+        question_text:
+          type: string
+          minLength: 1
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        options:
+          nullable: true
+          description: JSON array of options for multiple choice questions
+        correct_answer:
+          type: string
+          minLength: 1
+          description: Correct answer or answer key
+        acceptable_answers:
+          nullable: true
+          description: JSON array of acceptable alternative answers
+        use_ai_grading:
+          type: boolean
+          description: Use AI/LLM for grading this question
+        grading_rubric:
+          type: string
+          description: Grading rubric for AI or manual grading
+        keywords:
+          nullable: true
+          description: Keywords for automated grading
+        keyword_weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          description: Weight of keyword matching in grading (0-1)
+      required:
+        - correct_answer
+        - exam
+        - question_number
+        - question_text
+        - question_type
+    QuestionStudent:
+      type: object
+      description: Serializer for questions visible to students (no correct answers).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        question_type:
+          enum:
+            - multiple_choice
+            - short_answer
+            - essay
+            - true_false
+          type: string
+          description: |-
+            * `multiple_choice` - Multiple Choice
+            * `short_answer` - Short Answer
+            * `essay` - Essay
+            * `true_false` - True/False
+          x-spec-enum-id: d9c2cc41009782f3
+        question_text:
+          type: string
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        options:
+          nullable: true
+          description: JSON array of options for multiple choice questions
+      required:
+        - id
+        - question_number
+        - question_text
+        - question_type
+    Student:
+      type: object
+      description: Serializer for student details in submissions.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+      required:
+        - email
+        - first_name
+        - full_name
+        - id
+        - last_name
+    SubmissionAnswer:
+      type: object
+      description: Serializer for creating/updating submission answers.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        submission:
+          type: integer
+        question:
+          type: integer
+        answer_text:
+          type: string
+          description: Student's answer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+        - answer_text
+        - created_at
+        - id
+        - question
+        - submission
+        - updated_at
+    SubmissionAnswerRequest:
+      type: object
+      description: Serializer for creating/updating submission answers.
+      properties:
+        submission:
+          type: integer
+        question:
+          type: integer
+        answer_text:
+          type: string
+          minLength: 1
+          description: Student's answer
+      required:
+        - answer_text
+        - question
+        - submission
+    SubmissionCreate:
+      type: object
+      description: Serializer for creating a new submission (starting an exam).
+      properties:
+        ip_address:
+          type: string
+          nullable: true
+          description: IP address from which submission was made
+        user_agent:
+          type: string
+          description: Browser user agent string
+    SubmissionCreateRequest:
+      type: object
+      description: Serializer for creating a new submission (starting an exam).
+      properties:
+        exam_id:
+          type: integer
+          writeOnly: true
+        ip_address:
+          type: string
+          nullable: true
+          minLength: 1
+          description: IP address from which submission was made
+        user_agent:
+          type: string
+          description: Browser user agent string
+      required:
+        - exam_id
+    SubmissionList:
+      type: object
+      description: Simplified serializer for listing submissions.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        student:
+          allOf:
+            - $ref: "#/components/schemas/Student"
+          readOnly: true
+        exam_title:
+          type: string
+          readOnly: true
+        course_name:
+          type: string
+          readOnly: true
+        attempt_number:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          enum:
+            - in_progress
+            - submitted
+            - graded
+          type: string
+          description: |-
+            * `in_progress` - In Progress
+            * `submitted` - Submitted
+            * `graded` - Graded
+          x-spec-enum-id: 10b035e76a1183c3
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        graded_at:
+          type: string
+          format: date-time
+          nullable: true
+        total_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          nullable: true
+        percentage:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        is_passed:
+          type: boolean
+          readOnly: true
+        is_late:
+          type: boolean
+          description: Whether submission was late
+        flagged_for_review:
+          type: boolean
+          description: Flag for manual review
+      required:
+        - course_name
+        - exam_title
+        - id
+        - is_passed
+        - started_at
+        - student
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+        - access
+        - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+        - refresh
+    User:
+      type: object
+      description: Serializer for user details.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        full_name:
+          type: string
+          readOnly: true
+        role:
+          enum:
+            - student
+            - instructor
+            - admin
+          type: string
+          x-spec-enum-id: 78bcdc1507268a2d
+          readOnly: true
+          description: |-
+            User role determines access permissions
+
+            * `student` - Student
+            * `instructor` - Instructor
+            * `admin` - Admin
+        is_verified:
+          type: boolean
+          readOnly: true
+          description: Designates whether the user has verified their email address.
+        is_active:
+          type: boolean
+          title: Active
+          description:
+            Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+        - date_joined
+        - email
+        - full_name
+        - id
+        - is_verified
+        - last_login
+        - role
+    UserLogin:
+      type: object
+      description: Custom JWT login serializer.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+    UserLoginRequest:
+      type: object
+      description: Custom JWT login serializer.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+        - email
+        - password
+    UserProfile:
+      type: object
+      description: Serializer for user profile updates.
+      properties:
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+    UserProfileRequest:
+      type: object
+      description: Serializer for user profile updates.
+      properties:
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+    UserRegistration:
+      type: object
+      description: Serializer for user registration.
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        role:
+          enum:
+            - student
+            - instructor
+          type: string
+          x-spec-enum-id: 1a389acad403b914
+          default: student
+          description: |-
+            User role (students can self-register, instructors require admin approval)
+
+            * `student` - student
+            * `instructor` - instructor
+      required:
+        - email
+    UserRegistrationRequest:
+      type: object
+      description: Serializer for user registration.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: Email address
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 1
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        role:
+          enum:
+            - student
+            - instructor
+          type: string
+          x-spec-enum-id: 1a389acad403b914
+          default: student
+          description: |-
+            User role (students can self-register, instructors require admin approval)
+
+            * `student` - student
+            * `instructor` - instructor
+      required:
+        - email
+        - password
+        - password_confirm
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.assessiq.com
+    description: Production server
+tags:
+  - name: Authentication
+    description: User authentication and account management
+  - name: Courses
+    description: Course management operations
+  - name: Exams
+    description: Exam creation and management
+  - name: Questions
+    description: Question management
+  - name: Submissions
+    description: Student submission handling
+  - name: Grading
+    description: Grading configuration and task management
