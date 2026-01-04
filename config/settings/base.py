@@ -184,11 +184,63 @@ FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 # API Documentation
 SPECTACULAR_SETTINGS = {
     "TITLE": "AssessIQ API",
-    "DESCRIPTION": "API documentation for AssessIQ - Mini Assessment Engine",
+    "DESCRIPTION": """
+    AssessIQ is a comprehensive assessment management system with AI-powered grading capabilities.
+
+    Features
+    - User authentication and role-based access control (Student, Instructor, Admin)
+    - Course and exam management
+    - Multiple question types (Multiple Choice, True/False, Short Answer, Essay)
+    - AI-powered grading with OpenAI, Claude, and Gemini
+    - Real-time submission tracking
+    - Comprehensive analytics and reporting
+
+    Authentication
+    This API uses JWT (JSON Web Token) authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your_token>
+    ```
+
+    Rate Limiting
+    - Anonymous users: 100 requests/hour
+    - Authenticated users: 1000 requests/hour
+    """,
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
+    "CONTACT": {
+        "name": "AssessIQ Support",
+        "email": "support@assessiq.com",
+    },
+    "LICENSE": {
+        "name": "MIT License",
+    },
+    "SERVERS": [
+        {"url": "http://localhost:8000", "description": "Development server"},
+        {"url": "https://api.assessiq.com", "description": "Production server"},
+    ],
+    "TAGS": [
+        {"name": "Authentication", "description": "User authentication"},
+        {"name": "Courses", "description": "Course management operations"},
+         {"name": "Exams - Instructor", "description": "Exam management for instructors"},
+        {"name": "Exams - Students", "description": "Exam access for students"},
+        {"name": "Questions", "description": "Question managementsS"},
+        {"name": "Submissions", "description": "Student submission handling"},
+        {"name": "Grading", "description": "Grading configuration and task management"},
+        {"name": "Email Verification", "description": "Email verification and resending"},
+        {"name": "User Profile", "description": "User profile management"},
+        {"name": "Password Reset", "description": "Password reset operations"},
+    ],
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+        "filter": True,
+    },
+    "PREPROCESSING_HOOKS": [],
+    "POSTPROCESSING_HOOKS": [],
+    "SCHEMA_COERCE_PATH_PK_SUFFIX": True,
 }
 
 # Celery Configuration
