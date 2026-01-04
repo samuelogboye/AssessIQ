@@ -36,6 +36,7 @@ class GeminiGradingService(BaseGradingService):
     def _get_api_key_from_settings(self):
         """Get API key from Django settings."""
         from django.conf import settings
+
         return getattr(settings, "GOOGLE_API_KEY", None)
 
     def grade(self, submission_answer) -> Dict[str, Any]:
@@ -129,21 +130,23 @@ class GeminiGradingService(BaseGradingService):
                 "method": "gemini",
                 "model": self.model_name,
                 "confidence": confidence,
-                "prompt_tokens": response.usage_metadata.prompt_token_count
-                if hasattr(response, "usage_metadata")
-                else None,
-                "completion_tokens": response.usage_metadata.candidates_token_count
-                if hasattr(response, "usage_metadata")
-                else None,
-                "finish_reason": response.candidates[0].finish_reason.name
-                if response.candidates
-                else None,
+                "prompt_tokens": (
+                    response.usage_metadata.prompt_token_count
+                    if hasattr(response, "usage_metadata")
+                    else None
+                ),
+                "completion_tokens": (
+                    response.usage_metadata.candidates_token_count
+                    if hasattr(response, "usage_metadata")
+                    else None
+                ),
+                "finish_reason": (
+                    response.candidates[0].finish_reason.name if response.candidates else None
+                ),
             }
             submission_answer.save()
 
-            logger.info(
-                f"Gemini graded answer {submission_answer.id}: {score}/{question.marks}"
-            )
+            logger.info(f"Gemini graded answer {submission_answer.id}: {score}/{question.marks}")
 
             return {
                 "score": float(score),

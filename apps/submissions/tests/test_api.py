@@ -1,6 +1,7 @@
 """
 API tests for submissions app.
 """
+
 import pytest
 from django.urls import reverse
 from rest_framework import status
@@ -214,16 +215,10 @@ class TestSubmissionAPI:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_list_submissions_as_student(
-        self, api_client, student, another_student, exam
-    ):
+    def test_list_submissions_as_student(self, api_client, student, another_student, exam):
         """Test student only sees their own submissions."""
-        sub1 = Submission.objects.create(
-            student=student, exam=exam, attempt_number=1
-        )
-        sub2 = Submission.objects.create(
-            student=another_student, exam=exam, attempt_number=1
-        )
+        sub1 = Submission.objects.create(student=student, exam=exam, attempt_number=1)
+        sub2 = Submission.objects.create(student=another_student, exam=exam, attempt_number=1)
 
         api_client.force_authenticate(user=student)
         url = reverse("submissions:submission-list")
@@ -233,9 +228,7 @@ class TestSubmissionAPI:
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == sub1.id
 
-    def test_list_submissions_as_instructor(
-        self, api_client, instructor, student, exam
-    ):
+    def test_list_submissions_as_instructor(self, api_client, instructor, student, exam):
         """Test instructor sees all submissions for their courses."""
         Submission.objects.create(student=student, exam=exam, attempt_number=1)
 
@@ -296,9 +289,7 @@ class TestSubmissionAPI:
         assert submission.status == "submitted"
         assert submission.answers.count() == 3
 
-    def test_submit_answers_validates_questions(
-        self, api_client, student, submission, exam
-    ):
+    def test_submit_answers_validates_questions(self, api_client, student, submission, exam):
         """Test submit answers validates questions belong to exam."""
         # Create question from different exam
         other_exam = Exam.objects.create(
@@ -327,9 +318,7 @@ class TestSubmissionAPI:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_grade_answer(
-        self, api_client, instructor, submitted_submission, questions
-    ):
+    def test_grade_answer(self, api_client, instructor, submitted_submission, questions):
         """Test instructor can manually grade answer."""
         answer = submitted_submission.answers.filter(score__isnull=True).first()
 
@@ -387,9 +376,7 @@ class TestSubmissionAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data["graded"] == 1
 
-    def test_pending_grading_list(
-        self, api_client, instructor, student, exam, questions
-    ):
+    def test_pending_grading_list(self, api_client, instructor, student, exam, questions):
         """Test instructor can get pending grading submissions."""
         # Create submitted submission
         Submission.objects.create(
@@ -415,16 +402,12 @@ class TestSubmissionAPI:
         assert response.status_code == status.HTTP_200_OK
         assert "answers" in response.data
 
-    def test_filter_submissions_by_status(
-        self, api_client, instructor, student, exam
-    ):
+    def test_filter_submissions_by_status(self, api_client, instructor, student, exam):
         """Test filtering submissions by status."""
         Submission.objects.create(
             student=student, exam=exam, attempt_number=1, status="in_progress"
         )
-        Submission.objects.create(
-            student=student, exam=exam, attempt_number=2, status="submitted"
-        )
+        Submission.objects.create(student=student, exam=exam, attempt_number=2, status="submitted")
 
         api_client.force_authenticate(user=instructor)
         url = reverse("submissions:submission-list") + "?status=submitted"
@@ -437,12 +420,20 @@ class TestSubmissionAPI:
     def test_filter_submissions_by_exam(self, api_client, instructor, student, course):
         """Test filtering submissions by exam."""
         exam1 = Exam.objects.create(
-            title="Exam 1", course=course, duration_minutes=60,
-            total_marks=100, passing_marks=50, status="published"
+            title="Exam 1",
+            course=course,
+            duration_minutes=60,
+            total_marks=100,
+            passing_marks=50,
+            status="published",
         )
         exam2 = Exam.objects.create(
-            title="Exam 2", course=course, duration_minutes=60,
-            total_marks=100, passing_marks=50, status="published"
+            title="Exam 2",
+            course=course,
+            duration_minutes=60,
+            total_marks=100,
+            passing_marks=50,
+            status="published",
         )
 
         Submission.objects.create(student=student, exam=exam1, attempt_number=1)
@@ -469,9 +460,7 @@ class TestSubmissionAnswerAPI:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 3
 
-    def test_filter_ungraded_answers(
-        self, api_client, instructor, submitted_submission
-    ):
+    def test_filter_ungraded_answers(self, api_client, instructor, submitted_submission):
         """Test filtering ungraded answers."""
         api_client.force_authenticate(user=instructor)
         url = reverse("submissions:answer-list") + "?ungraded=true"
@@ -480,9 +469,7 @@ class TestSubmissionAnswerAPI:
         assert response.status_code == status.HTTP_200_OK
         assert all(item["score"] is None for item in response.data["results"])
 
-    def test_filter_answers_needing_review(
-        self, api_client, instructor, submitted_submission
-    ):
+    def test_filter_answers_needing_review(self, api_client, instructor, submitted_submission):
         """Test filtering answers needing manual review."""
         answer = submitted_submission.answers.first()
         answer.requires_manual_review = True
@@ -495,9 +482,7 @@ class TestSubmissionAnswerAPI:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) >= 1
 
-    def test_grade_individual_answer(
-        self, api_client, instructor, submitted_submission
-    ):
+    def test_grade_individual_answer(self, api_client, instructor, submitted_submission):
         """Test grading individual answer."""
         answer = submitted_submission.answers.filter(score__isnull=True).first()
 

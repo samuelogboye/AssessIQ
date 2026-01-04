@@ -1,6 +1,7 @@
 """
 Views for submissions app.
 """
+
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -224,14 +225,10 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         submission = self.get_object()
 
         # Get the answer
-        answer = get_object_or_404(
-            SubmissionAnswer, id=answer_id, submission=submission
-        )
+        answer = get_object_or_404(SubmissionAnswer, id=answer_id, submission=submission)
 
         # Validate and save grade
-        serializer = SubmissionGradeSerializer(
-            data=request.data, context={"answer": answer}
-        )
+        serializer = SubmissionGradeSerializer(data=request.data, context={"answer": answer})
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -261,25 +258,17 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                 continue
 
             try:
-                answer = SubmissionAnswer.objects.get(
-                    id=answer_id, submission=submission
-                )
+                answer = SubmissionAnswer.objects.get(id=answer_id, submission=submission)
             except SubmissionAnswer.DoesNotExist:
-                errors.append(
-                    {"answer_id": answer_id, "error": "Answer not found"}
-                )
+                errors.append({"answer_id": answer_id, "error": "Answer not found"})
                 continue
 
-            serializer = SubmissionGradeSerializer(
-                data=grade_data, context={"answer": answer}
-            )
+            serializer = SubmissionGradeSerializer(data=grade_data, context={"answer": answer})
             if serializer.is_valid():
                 serializer.save()
                 results.append({"answer_id": answer_id, "status": "graded"})
             else:
-                errors.append(
-                    {"answer_id": answer_id, "errors": serializer.errors}
-                )
+                errors.append({"answer_id": answer_id, "errors": serializer.errors})
 
         return Response(
             {
@@ -299,9 +288,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             )
 
         submissions = (
-            Submission.objects.filter(
-                status="submitted", exam__course__instructor=request.user
-            )
+            Submission.objects.filter(status="submitted", exam__course__instructor=request.user)
             .select_related("student", "exam", "exam__course")
             .order_by("-submitted_at")
         )
@@ -369,9 +356,7 @@ class SubmissionAnswerViewSet(viewsets.ModelViewSet):
         if user.role == "student":
             queryset = queryset.filter(submission__student=user)
         elif user.role == "instructor":
-            queryset = queryset.filter(
-                submission__exam__course__instructor=user
-            )
+            queryset = queryset.filter(submission__exam__course__instructor=user)
 
         # Filter by submission
         submission_id = self.request.query_params.get("submission")
@@ -434,9 +419,7 @@ class SubmissionAnswerViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        serializer = SubmissionGradeSerializer(
-            data=request.data, context={"answer": answer}
-        )
+        serializer = SubmissionGradeSerializer(data=request.data, context={"answer": answer})
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

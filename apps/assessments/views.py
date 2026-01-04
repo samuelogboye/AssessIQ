@@ -1,6 +1,7 @@
 """
 Views for assessments app.
 """
+
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -51,9 +52,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         Instructors see their own courses.
         """
         user = self.request.user
-        queryset = Course.objects.select_related("instructor").annotate(
-            exam_count=Count("exams")
-        )
+        queryset = Course.objects.select_related("instructor").annotate(exam_count=Count("exams"))
 
         # Filter by query parameters
         is_active = self.request.query_params.get("is_active")
@@ -111,7 +110,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         course.save(update_fields=["is_active", "updated_at"])
 
         return Response(
-            {"is_active": course.is_active, "message": f"Course {'activated' if course.is_active else 'deactivated'} successfully."}
+            {
+                "is_active": course.is_active,
+                "message": f"Course {'activated' if course.is_active else 'deactivated'} successfully.",
+            }
         )
 
 
@@ -254,6 +256,7 @@ class ExamViewSet(viewsets.ModelViewSet):
 
         return Response(stats)
 
+
 @extend_schema(tags=["Exams - Students"])
 class StudentExamViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -313,9 +316,9 @@ class StudentExamViewSet(viewsets.ReadOnlyModelViewSet):
         from apps.submissions.serializers import SubmissionStudentSerializer
 
         exam = self.get_object()
-        submissions = Submission.objects.filter(
-            exam=exam, student=request.user
-        ).prefetch_related("answers", "answers__question")
+        submissions = Submission.objects.filter(exam=exam, student=request.user).prefetch_related(
+            "answers", "answers__question"
+        )
 
         serializer = SubmissionStudentSerializer(submissions, many=True)
         return Response(serializer.data)
@@ -330,19 +333,13 @@ class StudentExamViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Check if exam is available
         if exam.start_time and now < exam.start_time:
-            return Response(
-                {"can_attempt": False, "reason": "Exam has not started yet."}
-            )
+            return Response({"can_attempt": False, "reason": "Exam has not started yet."})
 
         if exam.end_time and now > exam.end_time:
-            return Response(
-                {"can_attempt": False, "reason": "Exam has ended."}
-            )
+            return Response({"can_attempt": False, "reason": "Exam has ended."})
 
         # Check attempt limit
-        attempt_count = Submission.objects.filter(
-            student=request.user, exam=exam
-        ).count()
+        attempt_count = Submission.objects.filter(student=request.user, exam=exam).count()
 
         if attempt_count >= exam.max_attempts:
             return Response(

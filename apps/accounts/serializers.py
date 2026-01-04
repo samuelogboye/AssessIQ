@@ -172,7 +172,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"new_password": "New password must be different from old password."}
             )
-        
+
         # validate new passwords match
         if attrs["new_password"] != attrs["new_password_confirm"]:
             raise serializers.ValidationError(

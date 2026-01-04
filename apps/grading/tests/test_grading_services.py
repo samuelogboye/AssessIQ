@@ -208,9 +208,7 @@ class TestOpenAIGradingService:
 
         # Mock invalid JSON response
         mock_response = MagicMock()
-        mock_response.choices = [
-            MagicMock(message=MagicMock(content="This is not JSON"))
-        ]
+        mock_response.choices = [MagicMock(message=MagicMock(content="This is not JSON"))]
         mock_response.usage = MagicMock(total_tokens=100)
         mock_client.chat.completions.create.return_value = mock_response
 
@@ -235,9 +233,7 @@ class TestClaudeGradingService:
         # Mock the API response
         mock_response = MagicMock()
         mock_response.content = [
-            MagicMock(
-                text='{"score": 8.5, "feedback": "Good answer!", "confidence": 90}'
-            )
+            MagicMock(text='{"score": 8.5, "feedback": "Good answer!", "confidence": 90}')
         ]
         mock_response.usage = MagicMock(
             input_tokens=100,
@@ -263,9 +259,7 @@ class TestClaudeGradingService:
         # Mock response with markdown-wrapped JSON
         mock_response = MagicMock()
         mock_response.content = [
-            MagicMock(
-                text='```json\n{"score": 7.0, "feedback": "Nice!", "confidence": 85}\n```'
-            )
+            MagicMock(text='```json\n{"score": 7.0, "feedback": "Nice!", "confidence": 85}\n```')
         ]
         mock_response.usage = MagicMock(input_tokens=100, output_tokens=50)
         mock_client.messages.create.return_value = mock_response

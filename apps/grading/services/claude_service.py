@@ -36,6 +36,7 @@ class ClaudeGradingService(BaseGradingService):
     def _get_api_key_from_settings(self):
         """Get API key from Django settings."""
         from django.conf import settings
+
         return getattr(settings, "ANTHROPIC_API_KEY", None)
 
     def grade(self, submission_answer) -> Dict[str, Any]:
@@ -123,9 +124,7 @@ class ClaudeGradingService(BaseGradingService):
             }
             submission_answer.save()
 
-            logger.info(
-                f"Claude graded answer {submission_answer.id}: {score}/{question.marks}"
-            )
+            logger.info(f"Claude graded answer {submission_answer.id}: {score}/{question.marks}")
 
             return {
                 "score": float(score),

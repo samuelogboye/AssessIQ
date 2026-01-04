@@ -1,6 +1,7 @@
 """
 Serializers for grading app.
 """
+
 from rest_framework import serializers
 from .models import GradingTask, GradingConfiguration
 from apps.submissions.serializers import SubmissionListSerializer
@@ -180,6 +181,7 @@ class GradingConfigurationSerializer(serializers.ModelSerializer):
                     {"service_config": "Temperature must be between 0 and 2"}
                 )
 
+
 class GradingConfigurationListSerializer(serializers.ModelSerializer):
     """Simplified serializer for listing grading configurations."""
 
@@ -224,7 +226,5 @@ class BulkGradeSerializer(serializers.Serializer):
     def validate_submission_ids(self, value):
         """Validate submission IDs."""
         if len(value) > 100:
-            raise serializers.ValidationError(
-                "Cannot grade more than 100 submissions at once."
-            )
+            raise serializers.ValidationError("Cannot grade more than 100 submissions at once.")
         return value

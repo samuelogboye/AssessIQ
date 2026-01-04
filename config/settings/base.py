@@ -223,7 +223,7 @@ SPECTACULAR_SETTINGS = {
     "TAGS": [
         {"name": "Authentication", "description": "User authentication"},
         {"name": "Courses", "description": "Course management operations"},
-         {"name": "Exams - Instructor", "description": "Exam management for instructors"},
+        {"name": "Exams - Instructor", "description": "Exam management for instructors"},
         {"name": "Exams - Students", "description": "Exam access for students"},
         {"name": "Questions", "description": "Question managementsS"},
         {"name": "Submissions", "description": "Student submission handling"},

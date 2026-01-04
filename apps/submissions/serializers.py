@@ -1,6 +1,7 @@
 """
 Serializers for submissions app.
 """
+
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -49,9 +50,7 @@ class SubmissionAnswerDetailSerializer(serializers.ModelSerializer):
 
     question = QuestionStudentSerializer(read_only=True)
     is_correct = serializers.BooleanField(read_only=True)
-    percentage_score = serializers.DecimalField(
-        max_digits=5, decimal_places=2, read_only=True
-    )
+    percentage_score = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
 
     class Meta:
         model = SubmissionAnswer
@@ -76,9 +75,7 @@ class SubmissionAnswerStudentSerializer(serializers.ModelSerializer):
 
     question = QuestionStudentSerializer(read_only=True)
     is_correct = serializers.BooleanField(read_only=True)
-    percentage_score = serializers.DecimalField(
-        max_digits=5, decimal_places=2, read_only=True
-    )
+    percentage_score = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
 
     class Meta:
         model = SubmissionAnswer
@@ -226,9 +223,7 @@ class SubmissionCreateSerializer(serializers.ModelSerializer):
 
         # Check if student has exceeded max attempts
         if exam.max_attempts:
-            attempt_count = Submission.objects.filter(
-                student=student, exam=exam
-            ).count()
+            attempt_count = Submission.objects.filter(student=student, exam=exam).count()
             if attempt_count >= exam.max_attempts:
                 raise serializers.ValidationError(
                     {
@@ -253,9 +248,7 @@ class SubmissionCreateSerializer(serializers.ModelSerializer):
         exam = validated_data["exam"]
 
         # Calculate attempt number
-        attempt_number = (
-            Submission.objects.filter(student=student, exam=exam).count() + 1
-        )
+        attempt_number = Submission.objects.filter(student=student, exam=exam).count() + 1
 
         submission = Submission.objects.create(
             student=student,
@@ -291,13 +284,9 @@ class SubmissionAnswerCreateSerializer(serializers.Serializer):
 
         for answer in value:
             if "question_id" not in answer:
-                raise serializers.ValidationError(
-                    "Each answer must have a question_id."
-                )
+                raise serializers.ValidationError("Each answer must have a question_id.")
             if "answer_text" not in answer:
-                raise serializers.ValidationError(
-                    "Each answer must have an answer_text."
-                )
+                raise serializers.ValidationError("Each answer must have an answer_text.")
 
             # Validate question belongs to exam
             try:
@@ -337,18 +326,14 @@ class SubmissionAnswerCreateSerializer(serializers.Serializer):
 class SubmissionGradeSerializer(serializers.Serializer):
     """Serializer for manually grading a submission answer."""
 
-    score = serializers.DecimalField(
-        max_digits=5, decimal_places=2, min_value=0, required=True
-    )
+    score = serializers.DecimalField(max_digits=5, decimal_places=2, min_value=0, required=True)
     feedback = serializers.CharField(required=False, allow_blank=True)
 
     def validate_score(self, value):
         """Validate score doesn't exceed question marks."""
         answer = self.context.get("answer")
         if answer and value > answer.question.marks:
-            raise serializers.ValidationError(
-                f"Score cannot exceed {answer.question.marks} marks."
-            )
+            raise serializers.ValidationError(f"Score cannot exceed {answer.question.marks} marks.")
         return value
 
     def save(self):

@@ -1,12 +1,18 @@
 """
 Views for grading app.
 """
+
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+    OpenApiParameter,
+    OpenApiExample,
+)
 from drf_spectacular.types import OpenApiTypes
 
 from .models import GradingTask, GradingConfiguration
@@ -58,7 +64,14 @@ from .tasks import bulk_grade_submissions
                 type=OpenApiTypes.STR,
                 location=OpenApiParameter.QUERY,
                 description="Order results by field (prefix with - for descending)",
-                enum=["started_at", "-started_at", "completed_at", "-completed_at", "status", "-status"],
+                enum=[
+                    "started_at",
+                    "-started_at",
+                    "completed_at",
+                    "-completed_at",
+                    "status",
+                    "-status",
+                ],
             ),
         ],
     ),
@@ -95,9 +108,7 @@ class GradingTaskViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Instructors see tasks for their courses
         if user.role == "instructor":
-            queryset = queryset.filter(
-                submission__exam__course__instructor=user
-            )
+            queryset = queryset.filter(submission__exam__course__instructor=user)
 
         # Filter by status
         task_status = self.request.query_params.get("status")
@@ -285,16 +296,14 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
         Instructors see global configs and their course configs.
         """
         user = self.request.user
-        queryset = GradingConfiguration.objects.select_related(
-            "exam", "question"
-        )
+        queryset = GradingConfiguration.objects.select_related("exam", "question")
 
         # Instructors see global configs + configs for their courses
         if user.role == "instructor":
             queryset = queryset.filter(
-                Q(scope="global") |
-                Q(exam__course__instructor=user) |
-                Q(question__exam__course__instructor=user)
+                Q(scope="global")
+                | Q(exam__course__instructor=user)
+                | Q(question__exam__course__instructor=user)
             )
 
         # Filter by scope
@@ -506,9 +515,7 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
 
         if submissions.count() != len(submission_ids):
             return Response(
-                {
-                    "error": "Some submissions not found or you don't have permission to grade them."
-                },
+                {"error": "Some submissions not found or you don't have permission to grade them."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
