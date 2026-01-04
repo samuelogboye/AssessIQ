@@ -4,6 +4,7 @@ Views for submissions app.
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q, Prefetch
 from django.shortcuts import get_object_or_404
@@ -28,6 +29,7 @@ from apps.core.permissions import (
 )
 
 
+@extend_schema(tags=["Submissions"])
 class SubmissionViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Submission model.
@@ -329,6 +331,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+@extend_schema(tags=["Submissions"])
 class SubmissionAnswerViewSet(viewsets.ModelViewSet):
     """
     ViewSet for SubmissionAnswer model.
