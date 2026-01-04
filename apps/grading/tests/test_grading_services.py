@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 
 from apps.assessments.models import Course, Exam, Question
 from apps.grading.services import GradingService
-from apps.grading.services.mock_service import MockGradingService
+from apps.grading.services.mock import MockGradingService
 from apps.submissions.models import Submission, SubmissionAnswer
 
 User = get_user_model()
