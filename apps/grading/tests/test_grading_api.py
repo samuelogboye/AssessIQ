@@ -45,7 +45,7 @@ def student():
 def course(instructor):
     """Create a course."""
     return Course.objects.create(
-        title="Test Course",
+        name="Test Course",
         code="CS101",
         description="Test course description",
         instructor=instructor,
