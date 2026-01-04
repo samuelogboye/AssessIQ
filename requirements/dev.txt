@@ -21,4 +21,4 @@ werkzeug==3.0.3
 
 # Debugging
 django-debug-toolbar==4.3.0
-ipython==8.24.0
+ipython==9.8.0
