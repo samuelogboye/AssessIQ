@@ -14,7 +14,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 
