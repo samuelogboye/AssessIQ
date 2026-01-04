@@ -4,6 +4,8 @@ services:
     image: postgres:15-alpine
     container_name: assessiq-db
     restart: always
+    ports:
+      - "5433:5432"  # External:Internal - avoid port conflict
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -24,6 +26,8 @@ services:
     image: redis:7-alpine
     container_name: assessiq-redis
     restart: always
+    ports:
+      - "6380:6379"  # External:Internal - avoid port conflict
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
@@ -37,11 +41,11 @@ services:
 
   # Django Application
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: samuelogboye/assessiq:latest  # Use pre-built image from Docker Hub
     container_name: assessiq-web
     restart: always
+    ports:
+      - "8002:8000"  # External:Internal - avoid port conflict
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput --clear &&
@@ -78,9 +82,7 @@ services:
 
   # Celery Worker
   celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: samuelogboye/assessiq:latest  # Use pre-built image from Docker Hub
     container_name: assessiq-celery
     restart: always
     command: celery -A config worker --loglevel=info --concurrency=4
@@ -103,9 +105,7 @@ services:
 
   # Celery Beat Scheduler
   celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: samuelogboye/assessiq:latest  # Use pre-built image from Docker Hub
     container_name: assessiq-celery-beat
     restart: always
     command: celery -A config beat --loglevel=info
@@ -120,30 +120,6 @@ services:
     depends_on:
       - db
       - redis
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: assessiq-nginx
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-    networks:
-      - assessiq-network
-    depends_on:
-      - web
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 volumes:
   postgres_data:
