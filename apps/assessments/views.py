@@ -4,6 +4,7 @@ Views for assessments app.
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q, Count, Prefetch
 from django.utils import timezone
@@ -28,6 +29,7 @@ from apps.core.permissions import (
 )
 
 
+@extend_schema(tags=["Courses"])
 class CourseViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Course model.
@@ -113,6 +115,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         )
 
 
+@extend_schema(tags=["Exams - Instructor"])
 class ExamViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Exam model (instructor view).
@@ -251,7 +254,7 @@ class ExamViewSet(viewsets.ModelViewSet):
 
         return Response(stats)
 
-
+@extend_schema(tags=["Exams - Students"])
 class StudentExamViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only ViewSet for students to view available exams.
@@ -372,6 +375,7 @@ class StudentExamViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
 
+@extend_schema(tags=["Questions"])
 class QuestionViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Question model.
