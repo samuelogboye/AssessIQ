@@ -251,6 +251,7 @@ class TestExamAPI:
                     "question_type": "short_answer",
                     "question_text": "Explain OOP.",
                     "marks": 10,
+                    "correct_answer": "Object-oriented programming uses classes and inheritance",
                     "keywords": ["object", "class", "inheritance"],
                 },
             ],
