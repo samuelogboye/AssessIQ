@@ -447,7 +447,7 @@ class TestBulkGradeAPI:
             role="instructor",
         )
         other_course = Course.objects.create(
-            title="Other Course",
+            name="Other Course",
             code="CS102",
             instructor=other_instructor,
         )
@@ -485,6 +485,7 @@ class TestBulkGradeAPI:
             s = Submission.objects.create(
                 exam=exam,
                 student=student,
+                attempt_number=i + 1,
                 status="submitted",
             )
             submission_ids.append(s.id)
@@ -552,7 +553,9 @@ class TestGradingConfigurationValidation:
         response = client.post(url, data, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "exam" in response.data
+        # Check if error is in response.data or nested under detail
+        error_data = response.data.get("detail", response.data)
+        assert "exam" in error_data
 
     def test_invalid_grading_service(self, instructor, exam):
         """Test invalid grading service is rejected."""

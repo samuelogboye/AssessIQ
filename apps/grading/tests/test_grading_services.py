@@ -45,7 +45,7 @@ def student():
 def course(instructor):
     """Create a course."""
     return Course.objects.create(
-        title="Test Course",
+        name="Test Course",
         code="CS101",
         description="Test course description",
         instructor=instructor,
@@ -70,10 +70,11 @@ def question(exam):
     """Create a question."""
     return Question.objects.create(
         exam=exam,
+        question_number=1,
         question_text="What is the capital of France?",
         question_type="short_answer",
         marks=10,
-        reference_answer="Paris",
+        correct_answer="Paris",
         keywords=["Paris", "capital", "France"],
     )
 

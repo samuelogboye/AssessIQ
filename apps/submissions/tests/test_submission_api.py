@@ -267,7 +267,9 @@ class TestSubmissionAPI:
         }
         response = api_client.post(url, data)
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        # Returns 404 because queryset filters out other students' submissions
+        # This is more secure as it doesn't leak information about submission existence
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_submit_answers(self, api_client, student, submission, questions):
         """Test submitting all answers at once."""
