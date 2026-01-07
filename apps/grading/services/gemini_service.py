@@ -11,6 +11,12 @@ from .base import BaseGradingService
 
 logger = logging.getLogger(__name__)
 
+# Try to import genai at module level for easier mocking in tests
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
 
 class GeminiGradingService(BaseGradingService):
     """
@@ -60,16 +66,15 @@ class GeminiGradingService(BaseGradingService):
             }
 
         try:
-            # Import Google Generative AI
-            try:
-                import google.generativeai as genai
-            except ImportError:
+            # Check if genai is available
+            if genai is None:
                 logger.error(
                     "Google Generative AI package not installed. Run: pip install google-generativeai"
                 )
                 submission_answer.requires_manual_review = True
                 submission_answer.save()
                 return {
+                    "score": 0.0,
                     "error": "Google Generative AI package not installed",
                     "requires_manual_review": True,
                 }
@@ -127,24 +132,23 @@ class GeminiGradingService(BaseGradingService):
             submission_answer.score = score
             submission_answer.feedback = feedback
             submission_answer.graded_by = "gemini"
-            submission_answer.grading_metadata = {
+
+            # Build metadata safely
+            metadata = {
                 "method": "gemini",
                 "model": self.model_name,
                 "confidence": confidence,
-                "prompt_tokens": (
-                    response.usage_metadata.prompt_token_count
-                    if hasattr(response, "usage_metadata")
-                    else None
-                ),
-                "completion_tokens": (
-                    response.usage_metadata.candidates_token_count
-                    if hasattr(response, "usage_metadata")
-                    else None
-                ),
-                "finish_reason": (
-                    response.candidates[0].finish_reason.name if response.candidates else None
-                ),
             }
+            try:
+                if hasattr(response, "usage_metadata") and response.usage_metadata:
+                    metadata["prompt_tokens"] = int(response.usage_metadata.prompt_token_count)
+                    metadata["completion_tokens"] = int(response.usage_metadata.candidates_token_count)
+                if hasattr(response, "candidates") and response.candidates:
+                    metadata["finish_reason"] = str(response.candidates[0].finish_reason.name)
+            except (AttributeError, TypeError, ValueError, IndexError):
+                pass  # Skip metadata that can't be serialized
+
+            submission_answer.grading_metadata = metadata
             submission_answer.save()
 
             logger.info(f"Gemini graded answer {submission_answer.id}: {score}/{question.marks}")
@@ -160,13 +164,21 @@ class GeminiGradingService(BaseGradingService):
             logger.error(f"Failed to parse Gemini response: {e}")
             submission_answer.requires_manual_review = True
             submission_answer.save()
-            return {"error": "Failed to parse AI response", "requires_manual_review": True}
+            return {
+                "score": 0.0,
+                "error": "Failed to parse AI response",
+                "requires_manual_review": True,
+            }
 
         except Exception as e:
             logger.error(f"Gemini grading error: {e}")
             submission_answer.requires_manual_review = True
             submission_answer.save()
-            return {"error": str(e), "requires_manual_review": True}
+            return {
+                "score": 0.0,
+                "error": str(e),
+                "requires_manual_review": True,
+            }
 
     def _build_grading_prompt(self, submission_answer) -> str:
         """
