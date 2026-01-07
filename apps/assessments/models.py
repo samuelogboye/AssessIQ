@@ -186,7 +186,9 @@ class Question(TimeStampedModel):
     )
 
     # Expected answer(s)
-    correct_answer = models.TextField(help_text=_("Correct answer or answer key"))
+    correct_answer = models.TextField(
+        blank=True, default="", help_text=_("Correct answer or answer key")
+    )
 
     # Alternative acceptable answers (for flexibility)
     acceptable_answers = models.JSONField(
