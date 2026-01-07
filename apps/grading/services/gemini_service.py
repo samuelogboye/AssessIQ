@@ -142,7 +142,9 @@ class GeminiGradingService(BaseGradingService):
             try:
                 if hasattr(response, "usage_metadata") and response.usage_metadata:
                     metadata["prompt_tokens"] = int(response.usage_metadata.prompt_token_count)
-                    metadata["completion_tokens"] = int(response.usage_metadata.candidates_token_count)
+                    metadata["completion_tokens"] = int(
+                        response.usage_metadata.candidates_token_count
+                    )
                 if hasattr(response, "candidates") and response.candidates:
                     metadata["finish_reason"] = str(response.candidates[0].finish_reason.name)
             except (AttributeError, TypeError, ValueError, IndexError):
