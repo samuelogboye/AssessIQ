@@ -40,16 +40,35 @@ class MockGradingService(BaseGradingService):
         student_answer = submission_answer.answer_text.lower()
         correct_answer = question.correct_answer.lower()
 
+        # Check for empty answer
+        if not submission_answer.answer_text or not submission_answer.answer_text.strip():
+            return {
+                "score": 0.0,
+                "score_percentage": 0.0,
+                "feedback": "No answer provided.",
+                "confidence": 100.0,
+                "requires_manual_review": True,
+                "method": "mock",
+            }
+
+        # Check for exact match first
+        if student_answer == correct_answer:
+            score = float(question.marks)
+            confidence = 100.0
+            feedback = "Perfect match! Answer is exactly correct."
         # Calculate score based on keywords if available
-        if question.keywords:
-            score, feedback = self._grade_with_keywords(
+        elif question.keywords:
+            score, feedback, confidence = self._grade_with_keywords(
                 student_answer, question.keywords, question.marks, question.keyword_weight
             )
         else:
             # Use simple text similarity
-            score, feedback = self._grade_with_similarity(
+            score, feedback, confidence = self._grade_with_similarity(
                 student_answer, correct_answer, question.marks
             )
+
+        # Calculate score percentage
+        score_percentage = (float(score) / float(question.marks) * 100) if question.marks > 0 else 0
 
         # Update the submission answer
         submission_answer.score = score
@@ -58,13 +77,19 @@ class MockGradingService(BaseGradingService):
         submission_answer.grading_metadata = {
             "method": "mock",
             "similarity_threshold": self.similarity_threshold,
-            "confidence": 75.0,  # Mock confidence score
+            "confidence": confidence,
         }
         submission_answer.save()
 
         logger.info(f"Mock graded answer {submission_answer.id}: {score}/{question.marks}")
 
-        return {"score": float(score), "feedback": feedback, "confidence": 75.0, "method": "mock"}
+        return {
+            "score": float(score),
+            "score_percentage": score_percentage,
+            "feedback": feedback,
+            "confidence": confidence,
+            "method": "mock",
+        }
 
     def _grade_with_keywords(
         self, answer: str, keywords: list, max_marks: float, weight: float
@@ -79,12 +104,15 @@ class MockGradingService(BaseGradingService):
             weight: Weight of keyword matching (0-1)
 
         Returns:
-            tuple: (score, feedback)
+            tuple: (score, feedback, confidence)
         """
         matched_keywords = [kw for kw in keywords if kw.lower() in answer]
         keyword_coverage = len(matched_keywords) / len(keywords) if keywords else 0
 
         score = max_marks * keyword_coverage * weight
+
+        # Calculate confidence based on keyword coverage
+        confidence = keyword_coverage * 100
 
         feedback = f"Keyword matching score: {keyword_coverage*100:.1f}%. "
         if matched_keywords:
@@ -99,7 +127,7 @@ class MockGradingService(BaseGradingService):
         else:
             feedback += "Answer lacks several important concepts."
 
-        return round(score, 2), feedback
+        return round(score, 2), feedback, confidence
 
     def _grade_with_similarity(self, answer: str, correct_answer: str, max_marks: float) -> tuple:
         """
@@ -111,19 +139,22 @@ class MockGradingService(BaseGradingService):
             max_marks: Maximum marks for the question
 
         Returns:
-            tuple: (score, feedback)
+            tuple: (score, feedback, confidence)
         """
         # Simple word overlap similarity
         answer_words = set(answer.split())
         correct_words = set(correct_answer.split())
 
         if not correct_words:
-            return 0, "Unable to grade: no reference answer available."
+            return 0, "Unable to grade: no reference answer available.", 50.0
 
         overlap = len(answer_words & correct_words)
         similarity = overlap / len(correct_words) if correct_words else 0
 
         score = max_marks * similarity
+
+        # Calculate confidence based on similarity
+        confidence = similarity * 100
 
         feedback = f"Text similarity score: {similarity*100:.1f}%. "
         if similarity >= 0.8:
@@ -133,7 +164,7 @@ class MockGradingService(BaseGradingService):
         else:
             feedback += "Answer differs significantly from expected response."
 
-        return round(score, 2), feedback
+        return round(score, 2), feedback, confidence
 
     def validate_config(self, config: dict[str, Any]) -> bool:
         """
