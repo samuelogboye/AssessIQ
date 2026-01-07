@@ -11,6 +11,12 @@ from .base import BaseGradingService
 
 logger = logging.getLogger(__name__)
 
+# Try to import Anthropic at module level for easier mocking in tests
+try:
+    from anthropic import Anthropic
+except ImportError:
+    Anthropic = None
+
 
 class ClaudeGradingService(BaseGradingService):
     """
@@ -60,14 +66,13 @@ class ClaudeGradingService(BaseGradingService):
             }
 
         try:
-            # Import Anthropic client
-            try:
-                from anthropic import Anthropic
-            except ImportError:
+            # Check if Anthropic is available
+            if Anthropic is None:
                 logger.error("Anthropic package not installed. Run: pip install anthropic")
                 submission_answer.requires_manual_review = True
                 submission_answer.save()
                 return {
+                    "score": 0.0,
                     "error": "Anthropic package not installed",
                     "requires_manual_review": True,
                 }
@@ -115,14 +120,23 @@ class ClaudeGradingService(BaseGradingService):
             submission_answer.score = score
             submission_answer.feedback = feedback
             submission_answer.graded_by = "claude"
-            submission_answer.grading_metadata = {
+
+            # Build metadata safely
+            metadata = {
                 "method": "claude",
                 "model": self.model,
                 "confidence": confidence,
-                "input_tokens": message.usage.input_tokens,
-                "output_tokens": message.usage.output_tokens,
-                "stop_reason": message.stop_reason,
             }
+            try:
+                if hasattr(message, "usage") and message.usage:
+                    metadata["input_tokens"] = int(message.usage.input_tokens)
+                    metadata["output_tokens"] = int(message.usage.output_tokens)
+                if hasattr(message, "stop_reason"):
+                    metadata["stop_reason"] = str(message.stop_reason)
+            except (AttributeError, TypeError, ValueError):
+                pass  # Skip metadata that can't be serialized
+
+            submission_answer.grading_metadata = metadata
             submission_answer.save()
 
             logger.info(f"Claude graded answer {submission_answer.id}: {score}/{question.marks}")
@@ -132,21 +146,27 @@ class ClaudeGradingService(BaseGradingService):
                 "feedback": feedback,
                 "confidence": confidence,
                 "method": "claude",
-                "input_tokens": message.usage.input_tokens,
-                "output_tokens": message.usage.output_tokens,
             }
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse Claude response: {e}")
             submission_answer.requires_manual_review = True
             submission_answer.save()
-            return {"error": "Failed to parse AI response", "requires_manual_review": True}
+            return {
+                "score": 0.0,
+                "error": "Failed to parse AI response",
+                "requires_manual_review": True,
+            }
 
         except Exception as e:
             logger.error(f"Claude grading error: {e}")
             submission_answer.requires_manual_review = True
             submission_answer.save()
-            return {"error": str(e), "requires_manual_review": True}
+            return {
+                "score": 0.0,
+                "error": str(e),
+                "requires_manual_review": True,
+            }
 
     def _build_grading_prompt(self, submission_answer) -> str:
         """
