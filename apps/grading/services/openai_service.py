@@ -11,6 +11,12 @@ from .base import BaseGradingService
 
 logger = logging.getLogger(__name__)
 
+# Try to import OpenAI at module level for easier mocking in tests
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
 
 class OpenAIGradingService(BaseGradingService):
     """
@@ -60,10 +66,8 @@ class OpenAIGradingService(BaseGradingService):
             }
 
         try:
-            # Import OpenAI client
-            try:
-                from openai import OpenAI
-            except ImportError:
+            # Check if OpenAI is available
+            if OpenAI is None:
                 logger.error("OpenAI package not installed. Run: pip install openai")
                 submission_answer.requires_manual_review = True
                 submission_answer.save()
@@ -131,20 +135,33 @@ class OpenAIGradingService(BaseGradingService):
                 "feedback": feedback,
                 "confidence": confidence,
                 "method": "openai",
-                "tokens_used": response.usage.total_tokens,
+                "metadata": {
+                    "tokens_used": response.usage.total_tokens,
+                    "prompt_tokens": response.usage.prompt_tokens,
+                    "completion_tokens": response.usage.completion_tokens,
+                    "model": self.model,
+                },
             }
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse OpenAI response: {e}")
             submission_answer.requires_manual_review = True
             submission_answer.save()
-            return {"error": "Failed to parse AI response", "requires_manual_review": True}
+            return {
+                "score": 0.0,
+                "error": "Failed to parse AI response",
+                "requires_manual_review": True,
+            }
 
         except Exception as e:
             logger.error(f"OpenAI grading error: {e}")
             submission_answer.requires_manual_review = True
             submission_answer.save()
-            return {"error": str(e), "requires_manual_review": True}
+            return {
+                "score": 0.0,
+                "error": str(e),
+                "requires_manual_review": True,
+            }
 
     def _build_grading_prompt(self, submission_answer) -> str:
         """
