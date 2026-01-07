@@ -29,6 +29,7 @@ class CourseSerializer(serializers.ModelSerializer):
         queryset=User.objects.filter(role="instructor"),
         source="instructor",
         write_only=True,
+        required=False,
     )
     exam_count = serializers.IntegerField(source="exams.count", read_only=True)
 
@@ -67,6 +68,8 @@ class CourseSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     """Serializer for Question model."""
 
+    correct_answer = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = Question
         fields = [
@@ -91,6 +94,16 @@ class QuestionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"options": "Multiple choice questions must have options."}
             )
+        # Ensure correct_answer is provided for non-essay questions
+        question_type = attrs.get("question_type")
+        if question_type in ["multiple_choice", "true_false", "short_answer"]:
+            if not attrs.get("correct_answer"):
+                raise serializers.ValidationError(
+                    {"correct_answer": f"{question_type} questions must have a correct answer."}
+                )
+        # Set default for correct_answer if essay type
+        if question_type == "essay" and not attrs.get("correct_answer"):
+            attrs["correct_answer"] = ""
         return attrs
 
 
@@ -261,6 +274,9 @@ class ExamStudentListSerializer(serializers.ModelSerializer):
 class NestedQuestionSerializer(serializers.ModelSerializer):
     """Serializer for creating questions within an exam (no exam field required)."""
 
+    question_number = serializers.IntegerField(required=False)
+    correct_answer = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = Question
         fields = [
@@ -283,6 +299,16 @@ class NestedQuestionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"options": "Multiple choice questions must have options."}
             )
+        # Ensure correct_answer is provided for non-essay questions
+        question_type = attrs.get("question_type")
+        if question_type in ["multiple_choice", "true_false", "short_answer"]:
+            if not attrs.get("correct_answer"):
+                raise serializers.ValidationError(
+                    {"correct_answer": f"{question_type} questions must have a correct answer."}
+                )
+        # Set default for correct_answer if essay type
+        if question_type == "essay" and not attrs.get("correct_answer"):
+            attrs["correct_answer"] = ""
         return attrs
 
 

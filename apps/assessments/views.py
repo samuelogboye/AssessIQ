@@ -7,6 +7,7 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -164,7 +165,7 @@ class ExamViewSet(viewsets.ModelViewSet):
         """Validate instructor owns the course."""
         course = serializer.validated_data.get("course")
         if course.instructor != self.request.user:
-            raise PermissionError("You can only create exams for your own courses.")
+            raise PermissionDenied("You can only create exams for your own courses.")
         serializer.save()
 
     @action(detail=True, methods=["post"])
@@ -414,9 +415,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
         """Validate instructor owns the exam's course."""
         exam = serializer.validated_data.get("exam")
         if not exam:
-            raise ValueError("Exam is required to create a question.")
+            raise ValidationError({"exam": "Exam is required to create a question."})
         if exam.course.instructor != self.request.user:
-            raise PermissionError("You can only create questions for your own exams.")
+            raise PermissionDenied("You can only create questions for your own exams.")
         serializer.save()
 
     def perform_update(self, serializer):
