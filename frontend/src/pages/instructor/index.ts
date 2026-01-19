@@ -1,0 +1,5 @@
+export { default as InstructorDashboard } from './Dashboard'
+export { default as InstructorCourses } from './Courses'
+export { default as InstructorExams } from './Exams'
+export { default as InstructorGrading } from './Grading'
+export { default as InstructorAnalytics } from './Analytics'
