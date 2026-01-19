@@ -1,0 +1,5 @@
+export { AuthProvider, useAuth } from './AuthContext'
+export { ProtectedRoute } from './ProtectedRoute'
+export { PublicOnlyRoute } from './PublicOnlyRoute'
+export { RoleGuard, InstructorOnly, StudentOnly, AdminOnly } from './RoleGuard'
+export * from './hooks'
