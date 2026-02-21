@@ -10,6 +10,8 @@ import type {
   SaveAnswerResponse,
   SubmitAnswersRequest,
   SubmitAnswersResponse,
+  GradingAnswer,
+  PendingSubmission,
 } from '@/types'
 
 export interface SubmissionsListParams {
@@ -72,6 +74,43 @@ export const submissionsApi = {
   // Get current answers for a submission (for resuming in-progress exam)
   getAnswers: async (id: number): Promise<{ question_id: number; answer_text: string }[]> => {
     const response = await apiClient.get(`/submissions/submissions/${id}/answers/`)
+    return response.data
+  },
+
+  // Get pending grading submissions (instructor)
+  pendingGrading: async (): Promise<PendingSubmission[]> => {
+    const response = await apiClient.get('/submissions/submissions/pending_grading/')
+    return response.data
+  },
+
+  // Get answers for a submission (instructor grading)
+  getSubmissionAnswers: async (submissionId: number): Promise<GradingAnswer[]> => {
+    const response = await apiClient.get('/submissions/answers/', {
+      params: { submission: submissionId },
+    })
+    return response.data
+  },
+
+  // Grade a single answer
+  gradeAnswer: async (answerId: number, data: { score: number; feedback?: string }) => {
+    const response = await apiClient.post(`/submissions/answers/${answerId}/grade/`, data)
+    return response.data
+  },
+
+  // Bulk grade answers for a submission
+  bulkGrade: async (
+    submissionId: number,
+    grades: { answer_id: number; score: number; feedback?: string }[]
+  ) => {
+    const response = await apiClient.post(`/submissions/submissions/${submissionId}/bulk_grade/`, {
+      grades,
+    })
+    return response.data
+  },
+
+  // Auto-grade submission
+  autoGrade: async (submissionId: number) => {
+    const response = await apiClient.post(`/submissions/submissions/${submissionId}/auto_grade/`)
     return response.data
   },
 }
