@@ -467,9 +467,11 @@ def dashboard_stats(request):
         status="submitted",
     ).count()
 
-    return Response({
-        "upcoming_exams_count": upcoming_exams_count,
-        "completed_exams_count": completed_exams_count,
-        "average_score": average_score,
-        "pending_results_count": pending_results_count,
-    })
+    return Response(
+        {
+            "upcoming_exams_count": upcoming_exams_count,
+            "completed_exams_count": completed_exams_count,
+            "average_score": average_score,
+            "pending_results_count": pending_results_count,
+        }
+    )
