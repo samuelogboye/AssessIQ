@@ -2,13 +2,16 @@
 Views for submissions app.
 """
 
+from django.db.models import Avg, Count, Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.assessments.models import Exam
 from apps.core.permissions import CanGradeSubmission, CanViewSubmission, IsStudent
 
 from .models import Submission, SubmissionAnswer
@@ -420,3 +423,53 @@ class SubmissionAnswerViewSet(viewsets.ModelViewSet):
 
         response_serializer = SubmissionAnswerDetailSerializer(answer)
         return Response(response_serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+@extend_schema(tags=["Submissions"])
+def dashboard_stats(request):
+    """Get dashboard statistics for the current student."""
+    if request.user.role != "student":
+        return Response(
+            {"detail": "Only students can access this endpoint."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    user = request.user
+    now = timezone.now()
+
+    # Get upcoming exams count (published exams that haven't started yet)
+    upcoming_exams_count = Exam.objects.filter(
+        status="published",
+        start_time__gt=now,
+    ).count()
+
+    # Get completed exams count (graded submissions for this student)
+    completed_exams_count = Submission.objects.filter(
+        student=user,
+        status="graded",
+    ).count()
+
+    # Get average score from graded submissions
+    avg_result = Submission.objects.filter(
+        student=user,
+        status="graded",
+        percentage__isnull=False,
+    ).aggregate(average_score=Avg("percentage"))
+    average_score = avg_result["average_score"]
+    if average_score is not None:
+        average_score = round(float(average_score), 1)
+
+    # Get pending results count (submitted but not yet graded)
+    pending_results_count = Submission.objects.filter(
+        student=user,
+        status="submitted",
+    ).count()
+
+    return Response({
+        "upcoming_exams_count": upcoming_exams_count,
+        "completed_exams_count": completed_exams_count,
+        "average_score": average_score,
+        "pending_results_count": pending_results_count,
+    })
