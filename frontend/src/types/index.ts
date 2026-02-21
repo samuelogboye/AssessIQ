@@ -1,1 +1,5 @@
 export * from './auth'
+export * from './course'
+export * from './exam'
+export * from './question'
+export * from './submission'
