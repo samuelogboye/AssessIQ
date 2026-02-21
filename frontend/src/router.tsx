@@ -25,7 +25,10 @@ const VerifyEmail = lazy(() => import('@/pages/auth/VerifyEmail'))
 // Student pages
 const StudentDashboard = lazy(() => import('@/pages/student/Dashboard'))
 const StudentExams = lazy(() => import('@/pages/student/Exams'))
+const StudentExamDetail = lazy(() => import('@/pages/student/ExamDetail'))
+const TakeExam = lazy(() => import('@/pages/student/TakeExam'))
 const StudentSubmissions = lazy(() => import('@/pages/student/Submissions'))
+const SubmissionReview = lazy(() => import('@/pages/student/SubmissionReview'))
 
 // Instructor pages
 const InstructorDashboard = lazy(() => import('@/pages/instructor/Dashboard'))
@@ -101,13 +104,29 @@ const router = createBrowserRouter([
         path: 'forgot-password',
         element: withSuspense(ForgotPassword),
       },
+    ],
+  },
+
+  // Email verification route (separate path with uidb64 and token params)
+  {
+    path: '/verify-email/:uidb64/:token',
+    element: <AuthLayout />,
+    children: [
       {
-        path: 'reset-password',
-        element: withSuspense(ResetPassword),
-      },
-      {
-        path: 'verify-email',
+        index: true,
         element: withSuspense(VerifyEmail),
+      },
+    ],
+  },
+
+  // Password reset route (separate path with uidb64 and token params)
+  {
+    path: '/reset-password/:uidb64/:token',
+    element: <AuthLayout />,
+    children: [
+      {
+        index: true,
+        element: withSuspense(ResetPassword),
       },
     ],
   },
@@ -136,14 +155,34 @@ const router = createBrowserRouter([
         element: withSuspense(StudentExams),
       },
       {
+        path: 'exams/:id',
+        element: withSuspense(StudentExamDetail),
+      },
+      {
         path: 'submissions',
         element: withSuspense(StudentSubmissions),
+      },
+      {
+        path: 'submissions/:id/review',
+        element: withSuspense(SubmissionReview),
       },
       {
         path: 'profile',
         element: withSuspense(Profile),
       },
     ],
+  },
+
+  // Exam taking route (full screen, no app shell)
+  {
+    path: '/student/exams/:id/take/:submissionId',
+    element: (
+      <ProtectedRoute>
+        <StudentOnly>
+          {withSuspense(TakeExam)}
+        </StudentOnly>
+      </ProtectedRoute>
+    ),
   },
 
   // Instructor dashboard routes (protected)
