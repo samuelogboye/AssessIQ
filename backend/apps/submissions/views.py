@@ -2,7 +2,7 @@
 Views for submissions app.
 """
 
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
