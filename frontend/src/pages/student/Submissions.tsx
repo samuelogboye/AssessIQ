@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Search,
   Filter,
@@ -10,16 +10,16 @@ import {
   AlertCircle,
   Download,
   FileText,
+  ArrowUpDown,
 } from 'lucide-react'
 import { Card, CardContent, Badge, Skeleton, Input, Button } from '@/components/ui'
-import { useSubmissions } from '@/features/student'
-import { coursesApi } from '@/api'
-import { useQuery } from '@tanstack/react-query'
+import { useSubmissions, useCourses } from '@/features/student'
 import { format, formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
 import type { SubmissionStatus } from '@/types'
 
 type StatusFilter = 'all' | SubmissionStatus
+type SortKey = 'exam' | 'course' | 'date' | 'score' | 'status'
 
 function SubmissionRow({
   submission,
@@ -141,17 +141,58 @@ export default function StudentSubmissions() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [courseFilter, setCourseFilter] = useState<number | undefined>()
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [sortKey, setSortKey] = useState<SortKey>('date')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const navigate = useNavigate()
 
   const { data: submissionsData, isLoading } = useSubmissions({
     search: searchQuery || undefined,
     status: statusFilter === 'all' ? undefined : statusFilter,
     course: courseFilter,
+    date_from: dateFrom || undefined,
+    date_to: dateTo || undefined,
+    page,
+    page_size: pageSize,
   })
 
-  const { data: coursesData } = useQuery({
-    queryKey: ['courses'],
-    queryFn: () => coursesApi.list({ is_active: true }),
-  })
+  const { data: coursesData } = useCourses()
+
+  const sortedResults = useMemo(() => {
+    const results = submissionsData?.results ? [...submissionsData.results] : []
+    const dir = sortDir === 'asc' ? 1 : -1
+
+    return results.sort((a, b) => {
+      switch (sortKey) {
+        case 'exam':
+          return a.exam_title.localeCompare(b.exam_title) * dir
+        case 'course':
+          return a.course_code.localeCompare(b.course_code) * dir
+        case 'score':
+          return ((a.percentage ?? -1) - (b.percentage ?? -1)) * dir
+        case 'status':
+          return a.status.localeCompare(b.status) * dir
+        case 'date':
+        default: {
+          const aDate = a.submitted_at ?? a.started_at
+          const bDate = b.submitted_at ?? b.started_at
+          return (new Date(aDate).getTime() - new Date(bDate).getTime()) * dir
+        }
+      }
+    })
+  }, [submissionsData?.results, sortDir, sortKey])
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+      return
+    }
+    setSortKey(key)
+    setSortDir('asc')
+  }
 
   // Calculate summary stats
   const stats = submissionsData?.results
@@ -246,7 +287,10 @@ export default function StudentSubmissions() {
                 type="text"
                 placeholder="Search by exam name..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setPage(1)
+                }}
                 className="pl-10"
               />
             </div>
@@ -256,7 +300,10 @@ export default function StudentSubmissions() {
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
               <select
                 value={courseFilter ?? ''}
-                onChange={(e) => setCourseFilter(e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) => {
+                  setCourseFilter(e.target.value ? Number(e.target.value) : undefined)
+                  setPage(1)
+                }}
                 className="pl-10 pr-4 py-2 bg-primary-800 border border-primary-600 rounded-lg text-neutral-100 focus:outline-none focus:ring-2 focus:ring-accent appearance-none min-w-[180px]"
               >
                 <option value="">All Courses</option>
@@ -275,7 +322,10 @@ export default function StudentSubmissions() {
                   key={status}
                   variant={statusFilter === status ? 'primary' : 'secondary'}
                   size="sm"
-                  onClick={() => setStatusFilter(status)}
+                  onClick={() => {
+                    setStatusFilter(status)
+                    setPage(1)
+                  }}
                 >
                   {status === 'all' && 'All'}
                   {status === 'graded' && 'Graded'}
@@ -284,11 +334,31 @@ export default function StudentSubmissions() {
                 </Button>
               ))}
             </div>
+
+            {/* Date Range */}
+            <div className="flex items-center gap-2">
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => {
+                  setDateFrom(e.target.value)
+                  setPage(1)
+                }}
+              />
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => {
+                  setDateTo(e.target.value)
+                  setPage(1)
+                }}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Submissions List */}
+      {/* Submissions Table */}
       <Card>
         <CardContent className="p-2">
           {isLoading ? (
@@ -299,15 +369,116 @@ export default function StudentSubmissions() {
               <SubmissionRowSkeleton />
               <SubmissionRowSkeleton />
             </div>
-          ) : submissionsData?.results && submissionsData.results.length > 0 ? (
-            <div className="divide-y divide-primary-700">
-              {submissionsData.results.map((submission) => (
-                <SubmissionRow key={submission.id} submission={submission} />
-              ))}
+          ) : sortedResults.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="text-neutral-400">
+                  <tr className="border-b border-primary-700">
+                    <th className="text-left px-4 py-3">
+                      <button
+                        className="inline-flex items-center gap-1"
+                        onClick={() => handleSort('exam')}
+                      >
+                        Exam
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                      </button>
+                    </th>
+                    <th className="text-left px-4 py-3">
+                      <button
+                        className="inline-flex items-center gap-1"
+                        onClick={() => handleSort('course')}
+                      >
+                        Course
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                      </button>
+                    </th>
+                    <th className="text-left px-4 py-3">
+                      <button
+                        className="inline-flex items-center gap-1"
+                        onClick={() => handleSort('date')}
+                      >
+                        Date
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                      </button>
+                    </th>
+                    <th className="text-left px-4 py-3">
+                      <button
+                        className="inline-flex items-center gap-1"
+                        onClick={() => handleSort('score')}
+                      >
+                        Score
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                      </button>
+                    </th>
+                    <th className="text-left px-4 py-3">
+                      <button
+                        className="inline-flex items-center gap-1"
+                        onClick={() => handleSort('status')}
+                      >
+                        Status
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                      </button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedResults.map((submission) => (
+                    <tr
+                      key={submission.id}
+                      className="border-b border-primary-700 hover:bg-primary-700/50 cursor-pointer"
+                      onClick={() => navigate(`/student/submissions/${submission.id}/review`)}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-neutral-100">
+                          {submission.exam_title}
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          Attempt #{submission.attempt_number}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-neutral-300">
+                        {submission.course_code}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-300">
+                        {submission.submitted_at
+                          ? format(new Date(submission.submitted_at), 'MMM d, yyyy')
+                          : format(new Date(submission.started_at), 'MMM d, yyyy')}
+                      </td>
+                      <td className="px-4 py-3">
+                        {submission.status === 'graded' && submission.percentage !== null ? (
+                          <span
+                            className={cn(
+                              'font-semibold',
+                              submission.is_passed ? 'text-success' : 'text-error'
+                            )}
+                          >
+                            {Math.round(submission.percentage)}%
+                          </span>
+                        ) : (
+                          <span className="text-neutral-500">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {submission.status === 'graded' ? (
+                          submission.is_passed ? (
+                            <Badge variant="success">Passed</Badge>
+                          ) : (
+                            <Badge variant="error">Failed</Badge>
+                          )
+                        ) : submission.status === 'submitted' ? (
+                          <Badge variant="warning">Pending</Badge>
+                        ) : (
+                          <Badge variant="secondary">In Progress</Badge>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div className="p-12 text-center">
-              {searchQuery || statusFilter !== 'all' || courseFilter ? (
+              {searchQuery || statusFilter !== 'all' || courseFilter || dateFrom || dateTo ? (
                 <>
                   <AlertCircle className="h-12 w-12 text-neutral-500 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-neutral-300 mb-2">No results found</h3>
@@ -319,6 +490,9 @@ export default function StudentSubmissions() {
                       setSearchQuery('')
                       setStatusFilter('all')
                       setCourseFilter(undefined)
+                      setDateFrom('')
+                      setDateTo('')
+                      setPage(1)
                     }}
                   >
                     Clear Filters
@@ -341,8 +515,29 @@ export default function StudentSubmissions() {
 
       {/* Pagination */}
       {submissionsData && submissionsData.count > 0 && (
-        <div className="text-center text-sm text-neutral-500">
-          Showing {submissionsData.results?.length ?? 0} of {submissionsData.count} submissions
+        <div className="flex items-center justify-between text-sm text-neutral-500">
+          <div>
+            Showing {sortedResults.length} of {submissionsData.count} submissions
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-neutral-400">Page {page}</span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={submissionsData.next === null}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
     </div>
