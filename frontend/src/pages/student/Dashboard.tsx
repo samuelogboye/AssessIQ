@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import {
   Calendar,
   CheckCircle2,
@@ -58,6 +59,7 @@ function StatCard({
 
 function UpcomingExamCard({
   exam,
+  now,
 }: {
   exam: {
     id: number
@@ -67,7 +69,10 @@ function UpcomingExamCard({
     start_time: string | null
     is_available: boolean
   }
+  now: number
 }) {
+  const showCountdown = !!exam.start_time && !exam.is_available && new Date(exam.start_time).getTime() > now
+
   return (
     <div className="flex items-center justify-between p-4 bg-primary-700/50 rounded-lg hover:bg-primary-700 transition-colors">
       <div className="flex-1 min-w-0">
@@ -78,6 +83,11 @@ function UpcomingExamCard({
           {exam.is_available && (
             <Badge variant="success" className="text-xs">
               Available Now
+            </Badge>
+          )}
+          {showCountdown && (
+            <Badge variant="warning" className="text-xs">
+              Starts in {formatDistanceToNow(new Date(exam.start_time!), { addSuffix: false })}
             </Badge>
           )}
         </div>
@@ -168,6 +178,12 @@ export default function StudentDashboard() {
   const { data: stats, isLoading: statsLoading } = useStudentDashboardStats()
   const { data: upcomingExams, isLoading: examsLoading } = useUpcomingExams(5)
   const { data: recentSubmissions, isLoading: submissionsLoading } = useRecentSubmissions(5)
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -236,7 +252,7 @@ export default function StudentDashboard() {
               </>
             ) : upcomingExams && upcomingExams.length > 0 ? (
               upcomingExams.map((exam) => (
-                <UpcomingExamCard key={exam.id} exam={exam} />
+                <UpcomingExamCard key={exam.id} exam={exam} now={now} />
               ))
             ) : (
               <div className="py-8 text-center">
