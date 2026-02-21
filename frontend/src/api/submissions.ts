@@ -88,7 +88,7 @@ export const submissionsApi = {
     const response = await apiClient.get('/submissions/answers/', {
       params: { submission: submissionId },
     })
-    return response.data
+    return response.data.results ?? response.data
   },
 
   // Grade a single answer
