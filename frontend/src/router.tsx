@@ -34,7 +34,9 @@ const SubmissionResults = lazy(() => import('@/pages/student/Results'))
 // Instructor pages
 const InstructorDashboard = lazy(() => import('@/pages/instructor/Dashboard'))
 const InstructorCourses = lazy(() => import('@/pages/instructor/Courses'))
+const InstructorCourseDetail = lazy(() => import('@/pages/instructor/CourseDetail'))
 const InstructorExams = lazy(() => import('@/pages/instructor/Exams'))
+const InstructorExamDetail = lazy(() => import('@/pages/instructor/ExamDetail'))
 const InstructorGrading = lazy(() => import('@/pages/instructor/Grading'))
 const InstructorAnalytics = lazy(() => import('@/pages/instructor/Analytics'))
 
@@ -214,8 +216,16 @@ const router = createBrowserRouter([
         element: withSuspense(InstructorCourses),
       },
       {
+        path: 'courses/:id',
+        element: withSuspense(InstructorCourseDetail),
+      },
+      {
         path: 'exams',
         element: withSuspense(InstructorExams),
+      },
+      {
+        path: 'exams/:id',
+        element: withSuspense(InstructorExamDetail),
       },
       {
         path: 'grading',
