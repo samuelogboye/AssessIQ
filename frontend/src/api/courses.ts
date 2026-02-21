@@ -4,6 +4,7 @@ import type {
   CourseListItem,
   CourseCreateRequest,
   CourseUpdateRequest,
+  ExamListItem,
 } from '@/types'
 
 export interface CoursesListParams {
@@ -57,7 +58,7 @@ export const coursesApi = {
   },
 
   // Get exams for a course
-  getExams: async (id: number): Promise<PaginatedResponse<CourseListItem>> => {
+  getExams: async (id: number): Promise<PaginatedResponse<ExamListItem>> => {
     const response = await apiClient.get(`/assessments/courses/${id}/exams/`)
     return response.data
   },
