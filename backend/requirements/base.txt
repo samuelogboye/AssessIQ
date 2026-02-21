@@ -24,7 +24,7 @@ django-ratelimit==4.1.0
 
 # Utilities
 python-dateutil==2.9.0
-pytz==2024.1
+pytz==2025.2
 python-json-logger==4.0.0
 
 whitenoise==6.11.0
