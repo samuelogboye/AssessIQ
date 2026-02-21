@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui'
 import { useAuth, useLogout } from '@/features/auth'
 import { ROUTES, USER_ROLES } from '@/lib/constants'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 // Navigation items for students
 const studentNavItems = [
@@ -41,6 +42,7 @@ export function AppShell() {
   const location = useLocation()
   const { user } = useAuth()
   const logoutMutation = useLogout()
+  const isOnline = useOnlineStatus()
 
   const isInstructor = user?.role === USER_ROLES.INSTRUCTOR || user?.role === USER_ROLES.ADMIN
   const navItems = isInstructor ? instructorNavItems : studentNavItems
@@ -51,6 +53,15 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-primary-900">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
+      {!isOnline && (
+        <div className="bg-warning/10 border-b border-warning/30 text-warning text-sm px-4 py-2">
+          You are offline. Changes will sync when you reconnect.
+        </div>
+      )}
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
@@ -209,7 +220,7 @@ export function AppShell() {
         </header>
 
         {/* Page Content */}
-        <main className="p-4 lg:p-8">
+        <main id="main-content" className="p-4 lg:p-8">
           <Outlet />
         </main>
       </div>
