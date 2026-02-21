@@ -302,104 +302,151 @@ export default function SubmissionReview() {
         </CardContent>
       </Card>
 
-      {/* Question Review */}
-      {review.exam.allow_review && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-accent" />
-              <h3 className="font-semibold text-neutral-100">Question Review</h3>
-            </div>
-            {currentQuestionIndex !== null && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentQuestionIndex(
-                      currentQuestionIndex > 0 ? currentQuestionIndex - 1 : null
-                    )
-                  }
-                  disabled={currentQuestionIndex === 0}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-neutral-400">
-                  {currentQuestionIndex + 1} / {review.answers.length}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentQuestionIndex(
-                      currentQuestionIndex < review.answers.length - 1
-                        ? currentQuestionIndex + 1
-                        : currentQuestionIndex
-                    )
-                  }
-                  disabled={currentQuestionIndex === review.answers.length - 1}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {currentQuestionIndex === null ? (
-              // Question summary grid
-              <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-                {review.answers.map((answer, index) => (
-                  <button
-                    key={answer.id}
-                    onClick={() => setCurrentQuestionIndex(index)}
-                    className={cn(
-                      'w-10 h-10 rounded-lg text-sm font-medium transition-all',
-                      answer.is_correct === true && 'bg-success/20 text-success border border-success/50',
-                      answer.is_correct === false && 'bg-error/20 text-error border border-error/50',
-                      answer.is_correct === null && 'bg-primary-700 text-neutral-400'
-                    )}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              // Single question view
-              <div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCurrentQuestionIndex(null)}
-                  className="mb-4"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Overview
-                </Button>
-                <AnswerReviewCard
-                  answer={review.answers[currentQuestionIndex]}
-                  index={currentQuestionIndex}
-                  showCorrectAnswer={review.exam.allow_review}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {/* Question Review + Summary Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
+          {review.exam.allow_review ? (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-accent" />
+                  <h3 className="font-semibold text-neutral-100">Question Review</h3>
+                </div>
+                {currentQuestionIndex !== null && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setCurrentQuestionIndex(
+                          currentQuestionIndex > 0 ? currentQuestionIndex - 1 : null
+                        )
+                      }
+                      disabled={currentQuestionIndex === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-neutral-400">
+                      {currentQuestionIndex + 1} / {review.answers.length}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setCurrentQuestionIndex(
+                          currentQuestionIndex < review.answers.length - 1
+                            ? currentQuestionIndex + 1
+                            : currentQuestionIndex
+                        )
+                      }
+                      disabled={currentQuestionIndex === review.answers.length - 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {currentQuestionIndex === null ? (
+                  <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                    {review.answers.map((answer, index) => (
+                      <button
+                        key={answer.id}
+                        onClick={() => setCurrentQuestionIndex(index)}
+                        className={cn(
+                          'w-10 h-10 rounded-lg text-sm font-medium transition-all',
+                          answer.is_correct === true && 'bg-success/20 text-success border border-success/50',
+                          answer.is_correct === false && 'bg-error/20 text-error border border-error/50',
+                          answer.is_correct === null && 'bg-primary-700 text-neutral-400'
+                        )}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentQuestionIndex(null)}
+                      className="mb-4"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back to Overview
+                    </Button>
+                    <AnswerReviewCard
+                      answer={review.answers[currentQuestionIndex]}
+                      index={currentQuestionIndex}
+                      showCorrectAnswer={review.exam.allow_review}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <AlertCircle className="h-12 w-12 text-neutral-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-neutral-300 mb-2">
+                  Review Not Available
+                </h3>
+                <p className="text-neutral-400">
+                  Question review is not enabled for this exam.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-      {/* Not allowed to review */}
-      {!review.exam.allow_review && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <AlertCircle className="h-12 w-12 text-neutral-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-neutral-300 mb-2">
-              Review Not Available
-            </h3>
-            <p className="text-neutral-400">
-              Question review is not enabled for this exam.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+        <div className="lg:col-span-1 space-y-4">
+          <Card>
+            <CardContent className="p-4 space-y-3">
+              <div className="text-sm text-neutral-400">Summary</div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-500">Questions</span>
+                <span className="text-neutral-200">{review.answers.length}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-500">Correct</span>
+                <span className="text-success">{correctCount}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-500">Incorrect</span>
+                <span className="text-error">{incorrectCount}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-neutral-500">Pending</span>
+                <span className="text-warning">{pendingCount}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {review.exam.allow_review && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-sm text-neutral-400 mb-3">Quick Nav</div>
+                <div className="grid grid-cols-5 gap-2">
+                  {review.answers.map((answer, index) => (
+                    <button
+                      key={answer.id}
+                      onClick={() => setCurrentQuestionIndex(index)}
+                      className={cn(
+                        'w-8 h-8 rounded-md text-xs font-medium transition-all',
+                        answer.is_correct === true && 'bg-success/20 text-success border border-success/50',
+                        answer.is_correct === false && 'bg-error/20 text-error border border-error/50',
+                        answer.is_correct === null && 'bg-primary-700 text-neutral-400'
+                      )}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
 
       {/* Actions */}
       <div className="flex justify-between">
