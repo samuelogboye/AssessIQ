@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Search,
@@ -12,13 +12,12 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { Card, CardContent, Badge, Skeleton, Input, Button } from '@/components/ui'
-import { useStudentExams } from '@/features/student'
-import { coursesApi } from '@/api'
-import { useQuery } from '@tanstack/react-query'
+import { useStudentExams, useCourses } from '@/features/student'
 import { format } from 'date-fns'
 import type { StudentExam } from '@/types'
 
 type AvailabilityFilter = 'all' | 'available' | 'upcoming' | 'past'
+type SortOption = 'date' | 'title'
 
 function ExamCard({ exam }: { exam: StudentExam }) {
   const getAvailabilityBadge = () => {
@@ -105,7 +104,7 @@ function ExamCard({ exam }: { exam: StudentExam }) {
             to={`/student/exams/${exam.id}`}
             className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-700 text-neutral-100 font-medium rounded-lg hover:bg-primary-600 transition-colors"
           >
-            {exam.is_available ? 'View Details' : 'View Details'}
+            {exam.is_available ? 'Start' : 'View Details'}
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
@@ -140,6 +139,7 @@ export default function StudentExams() {
   const [searchQuery, setSearchQuery] = useState('')
   const [courseFilter, setCourseFilter] = useState<number | undefined>()
   const [availabilityFilter, setAvailabilityFilter] = useState<AvailabilityFilter>('all')
+  const [sortOption, setSortOption] = useState<SortOption>('date')
 
   const { data: examsData, isLoading: examsLoading } = useStudentExams({
     search: searchQuery || undefined,
@@ -147,21 +147,29 @@ export default function StudentExams() {
     available_only: availabilityFilter === 'available' ? true : undefined,
   })
 
-  const { data: coursesData } = useQuery({
-    queryKey: ['courses'],
-    queryFn: () => coursesApi.list({ is_active: true }),
-  })
+  const { data: coursesData } = useCourses()
 
-  const filteredExams = examsData?.results?.filter((exam) => {
-    if (availabilityFilter === 'available') return exam.is_available
-    if (availabilityFilter === 'upcoming') {
-      return exam.start_time && new Date(exam.start_time) > new Date()
-    }
-    if (availabilityFilter === 'past') {
-      return exam.end_time && new Date(exam.end_time) < new Date()
-    }
-    return true
-  })
+  const filteredExams = useMemo(() => {
+    const base = examsData?.results?.filter((exam) => {
+      if (availabilityFilter === 'available') return exam.is_available
+      if (availabilityFilter === 'upcoming') {
+        return exam.start_time && new Date(exam.start_time) > new Date()
+      }
+      if (availabilityFilter === 'past') {
+        return exam.end_time && new Date(exam.end_time) < new Date()
+      }
+      return true
+    }) || []
+
+    return [...base].sort((a, b) => {
+      if (sortOption === 'title') {
+        return a.title.localeCompare(b.title)
+      }
+      const aTime = a.start_time ? new Date(a.start_time).getTime() : Number.MAX_SAFE_INTEGER
+      const bTime = b.start_time ? new Date(b.start_time).getTime() : Number.MAX_SAFE_INTEGER
+      return aTime - bTime
+    })
+  }, [examsData?.results, availabilityFilter, sortOption])
 
   return (
     <div className="space-y-6">
@@ -223,6 +231,18 @@ export default function StudentExams() {
                   </Button>
                 )
               )}
+            </div>
+
+            {/* Sort */}
+            <div className="relative">
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value as SortOption)}
+                className="pl-4 pr-8 py-2 bg-primary-800 border border-primary-600 rounded-lg text-neutral-100 focus:outline-none focus:ring-2 focus:ring-accent appearance-none min-w-[160px]"
+              >
+                <option value="date">Sort: Date</option>
+                <option value="title">Sort: Title</option>
+              </select>
             </div>
           </div>
         </CardContent>
