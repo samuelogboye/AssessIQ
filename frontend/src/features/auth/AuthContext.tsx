@@ -54,6 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = useCallback(async (data: LoginRequest) => {
     const response = await authApi.login(data)
+    console.log("Login response:", response)
     setState({ user: response.user, isAuthenticated: true, isLoading: false })
   }, [])
 
