@@ -291,9 +291,7 @@ class SubmissionAnswerCreateSerializer(serializers.Serializer):
             try:
                 question_id = int(answer["question_id"])
             except (ValueError, TypeError) as err:
-                raise serializers.ValidationError(
-                    "Invalid question_id format."
-                ) from err
+                raise serializers.ValidationError("Invalid question_id format.") from err
 
             if question_id not in exam_questions:
                 raise serializers.ValidationError(
