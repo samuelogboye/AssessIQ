@@ -1,3 +1,6 @@
 export { default as StudentDashboard } from './Dashboard'
 export { default as StudentExams } from './Exams'
+export { default as StudentExamDetail } from './ExamDetail'
+export { default as TakeExam } from './TakeExam'
 export { default as StudentSubmissions } from './Submissions'
+export { default as SubmissionReview } from './SubmissionReview'
