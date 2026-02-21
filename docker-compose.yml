@@ -27,11 +27,11 @@ services:
 
   web:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile.dev
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
+      - ./backend:/app
     ports:
       - "8000:8000"
     env_file:
@@ -50,11 +50,11 @@ services:
 
   celery:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile.dev
     command: celery -A config worker --loglevel=info
     volumes:
-      - .:/app
+      - ./backend:/app
     env_file:
       - .env
     environment:
@@ -68,11 +68,11 @@ services:
 
   celery-beat:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile.dev
     command: celery -A config beat --loglevel=info
     volumes:
-      - .:/app
+      - ./backend:/app
     env_file:
       - .env
     environment:
@@ -83,6 +83,21 @@ services:
     depends_on:
       - db
       - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
