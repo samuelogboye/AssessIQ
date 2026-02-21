@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useVerifyEmail } from '@/features/auth'
 import { ROUTES } from '@/lib/constants'
 
 export default function VerifyEmail() {
-  const [searchParams] = useSearchParams()
+  const { uidb64, token } = useParams<{ uidb64: string; token: string }>()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const verifyMutation = useVerifyEmail()
-
-  const uidb64 = searchParams.get('uid')
-  const token = searchParams.get('token')
 
   useEffect(() => {
     if (!uidb64 || !token) {

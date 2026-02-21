@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Lock, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react'
@@ -9,13 +9,10 @@ import { resetPasswordSchema, type ResetPasswordFormData, getPasswordStrength } 
 import { ROUTES } from '@/lib/constants'
 
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams()
+  const { uidb64, token } = useParams<{ uidb64: string; token: string }>()
   const [isSuccess, setIsSuccess] = useState(false)
   const [isInvalid, setIsInvalid] = useState(false)
   const resetMutation = useConfirmPasswordReset()
-
-  const uidb64 = searchParams.get('uid')
-  const token = searchParams.get('token')
 
   useEffect(() => {
     if (!uidb64 || !token) {

@@ -33,11 +33,14 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     try {
+      console.log("Submitting login with data:", data)
       await login(data)
+      console.log("Login successful")
       toast.success('Welcome back!')
 
       // Get user to determine redirect
       const user = await authApi.getProfile()
+      console.log("User profile fetched:", user)
 
       if (from) {
         navigate(from, { replace: true })
