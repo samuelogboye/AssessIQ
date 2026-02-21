@@ -419,7 +419,7 @@ export default function InstructorExams() {
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <Badge variant="warning">{selected.length} selected</Badge>
-            <Button variant="secondary" onClick={handleBulkPublish}>
+            <Button variant="secondary" onClick={handleBulkPublish} data-testid="bulk-publish">
               <CheckSquare className="h-4 w-4 mr-2" />
               Publish
             </Button>

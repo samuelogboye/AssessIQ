@@ -69,7 +69,7 @@ describe('InstructorExams', () => {
 
     const checkbox = screen.getByRole('checkbox')
     await user.click(checkbox)
-    await user.click(screen.getByRole('button', { name: /publish/i }))
+    await user.click(screen.getByTestId('bulk-publish'))
 
     expect(mockPublish).toHaveBeenCalled()
   })

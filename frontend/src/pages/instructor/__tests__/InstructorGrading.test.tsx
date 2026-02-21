@@ -64,7 +64,7 @@ describe('InstructorGrading', () => {
   it('renders pending submissions list', () => {
     render(<InstructorGrading />)
     expect(screen.getByText('Midterm')).toBeInTheDocument()
-    expect(screen.getByText('student@example.com')).toBeInTheDocument()
+    expect(screen.getByText(/Attempt #1/)).toBeInTheDocument()
   })
 
   it('switches to tasks tab', async () => {
