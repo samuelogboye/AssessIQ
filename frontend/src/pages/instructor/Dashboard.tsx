@@ -7,36 +7,92 @@ import {
   ArrowRight,
   Plus,
   AlertCircle,
+  TrendingUp,
+  Clock,
 } from 'lucide-react'
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui'
+import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Skeleton } from '@/components/ui'
 import { useAuth } from '@/features/auth'
+import {
+  useInstructorDashboardStats,
+  usePendingGrading,
+  useRecentActivity,
+  useRecentExams,
+} from '@/features/instructor'
 import { ROUTES } from '@/lib/constants'
+import { formatDistanceToNow } from 'date-fns'
 
-// Placeholder stats - will be replaced with real data in Sprint 4
-const stats = [
-  { label: 'Total Courses', value: 4, icon: BookOpen, color: 'text-info' },
-  { label: 'Active Exams', value: 8, icon: FileText, color: 'text-success' },
-  { label: 'Pending Grading', value: 15, icon: ClipboardCheck, color: 'text-warning' },
-  { label: 'Total Students', value: 142, icon: Users, color: 'text-accent' },
-]
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  color,
+  isLoading,
+}: {
+  label: string
+  value: number | string
+  icon: React.ElementType
+  color: string
+  isLoading?: boolean
+}) {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-2">
+          <Icon className={`h-5 w-5 ${color}`} />
+        </div>
+        {isLoading ? (
+          <Skeleton className="h-8 w-16 mb-1" />
+        ) : (
+          <p className="text-2xl font-bold text-neutral-100">{value}</p>
+        )}
+        <p className="text-sm text-neutral-400">{label}</p>
+      </CardContent>
+    </Card>
+  )
+}
 
-// Placeholder recent activity
-const recentActivity = [
-  { id: 1, type: 'submission', message: 'John Doe submitted Midterm Exam', time: '5 min ago' },
-  { id: 2, type: 'graded', message: 'Quiz 2 grading completed', time: '1 hour ago' },
-  { id: 3, type: 'submission', message: '3 new submissions for CS101 Final', time: '2 hours ago' },
-  { id: 4, type: 'published', message: 'MATH201 Quiz 3 published', time: '3 hours ago' },
-]
+function PendingGradingSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="p-4 rounded-lg bg-primary-700/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <Skeleton className="h-6 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
-// Placeholder pending grading
-const pendingGrading = [
-  { id: 1, exam: 'Midterm Exam', course: 'CS101', count: 8, oldest: '2 days ago' },
-  { id: 2, exam: 'Essay Assignment', course: 'ENG102', count: 5, oldest: '1 day ago' },
-  { id: 3, exam: 'Quiz 3', course: 'MATH201', count: 2, oldest: '3 hours ago' },
-]
+function RecentActivitySkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex items-start gap-3">
+          <Skeleton className="h-2 w-2 rounded-full mt-2" />
+          <div className="flex-1">
+            <Skeleton className="h-4 w-48 mb-1" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function InstructorDashboard() {
   const { user } = useAuth()
+  const { data: stats, isLoading: statsLoading } = useInstructorDashboardStats()
+  const { data: pendingGrading, isLoading: pendingLoading } = usePendingGrading(5)
+  const { data: recentActivity, isLoading: activityLoading } = useRecentActivity(10)
+  const { data: recentExams, isLoading: examsLoading } = useRecentExams(5)
+
+  const totalPending = pendingGrading?.reduce((acc, p) => acc + p.pending_count, 0) ?? 0
 
   return (
     <div className="space-y-8">
@@ -56,7 +112,7 @@ export default function InstructorDashboard() {
             </Link>
           </Button>
           <Button asChild>
-            <Link to={ROUTES.INSTRUCTOR_CREATE_EXAM}>
+            <Link to={ROUTES.INSTRUCTOR_EXAMS}>
               <Plus className="mr-2 h-4 w-4" />
               New Exam
             </Link>
@@ -65,18 +121,23 @@ export default function InstructorDashboard() {
       </div>
 
       {/* Pending Grading Alert */}
-      {pendingGrading.length > 0 && (
+      {!pendingLoading && totalPending > 0 && (
         <Card className="border-warning/50 bg-warning/5">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="h-5 w-5 text-warning" />
               <div>
                 <p className="font-medium text-neutral-100">
-                  {pendingGrading.reduce((acc, p) => acc + p.count, 0)} submissions awaiting grading
+                  {totalPending} submissions awaiting grading
                 </p>
-                <p className="text-sm text-neutral-400">
-                  Oldest submission from {pendingGrading[0].oldest}
-                </p>
+                {pendingGrading && pendingGrading[0] && (
+                  <p className="text-sm text-neutral-400">
+                    Oldest submission from{' '}
+                    {formatDistanceToNow(new Date(pendingGrading[0].oldest_submission), {
+                      addSuffix: true,
+                    })}
+                  </p>
+                )}
               </div>
             </div>
             <Button asChild>
@@ -91,17 +152,34 @@ export default function InstructorDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              </div>
-              <p className="text-2xl font-bold text-neutral-100">{stat.value}</p>
-              <p className="text-sm text-neutral-400">{stat.label}</p>
-            </CardContent>
-          </Card>
-        ))}
+        <StatCard
+          label="Total Courses"
+          value={stats?.total_courses ?? 0}
+          icon={BookOpen}
+          color="text-info"
+          isLoading={statsLoading}
+        />
+        <StatCard
+          label="Active Exams"
+          value={stats?.active_exams ?? 0}
+          icon={FileText}
+          color="text-success"
+          isLoading={statsLoading}
+        />
+        <StatCard
+          label="Pending Grading"
+          value={stats?.pending_grading ?? 0}
+          icon={ClipboardCheck}
+          color="text-warning"
+          isLoading={statsLoading}
+        />
+        <StatCard
+          label="Recent Submissions"
+          value={stats?.recent_submissions ?? 0}
+          icon={TrendingUp}
+          color="text-accent"
+          isLoading={statsLoading}
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -117,21 +195,34 @@ export default function InstructorDashboard() {
             </Link>
           </CardHeader>
           <CardContent className="space-y-4">
-            {pendingGrading.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-primary-700/50 hover:bg-primary-700 transition-colors"
-              >
-                <div>
-                  <p className="font-medium text-neutral-100">{item.exam}</p>
-                  <p className="text-sm text-neutral-400">{item.course}</p>
-                </div>
-                <div className="text-right">
-                  <Badge variant="warning">{item.count} pending</Badge>
-                  <p className="text-xs text-neutral-400 mt-1">{item.oldest}</p>
-                </div>
+            {pendingLoading ? (
+              <PendingGradingSkeleton />
+            ) : pendingGrading && pendingGrading.length > 0 ? (
+              pendingGrading.map((item) => (
+                <Link
+                  key={item.id}
+                  to={`${ROUTES.INSTRUCTOR_GRADING}?exam=${item.exam_id}`}
+                  className="flex items-center justify-between p-4 rounded-lg bg-primary-700/50 hover:bg-primary-700 transition-colors block"
+                >
+                  <div>
+                    <p className="font-medium text-neutral-100">{item.exam_title}</p>
+                    <p className="text-sm text-neutral-400">{item.course_code}</p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant="warning">{item.pending_count} pending</Badge>
+                    <p className="text-xs text-neutral-400 mt-1">
+                      {formatDistanceToNow(new Date(item.oldest_submission), { addSuffix: true })}
+                    </p>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="py-8 text-center">
+                <ClipboardCheck className="h-10 w-10 text-neutral-600 mx-auto mb-3" />
+                <p className="text-neutral-400">No pending grading</p>
+                <p className="text-sm text-neutral-500">All submissions have been graded</p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
@@ -141,18 +232,108 @@ export default function InstructorDashboard() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-accent mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm text-neutral-200">{activity.message}</p>
-                  <p className="text-xs text-neutral-500">{activity.time}</p>
+            {activityLoading ? (
+              <RecentActivitySkeleton />
+            ) : recentActivity && recentActivity.length > 0 ? (
+              recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div
+                    className={`h-2 w-2 rounded-full mt-2 ${
+                      activity.type === 'submission'
+                        ? 'bg-info'
+                        : activity.type === 'graded'
+                        ? 'bg-success'
+                        : activity.type === 'published'
+                        ? 'bg-accent'
+                        : 'bg-neutral-500'
+                    }`}
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm text-neutral-200">{activity.message}</p>
+                    <p className="text-xs text-neutral-500">
+                      {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                    </p>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="py-8 text-center">
+                <Clock className="h-10 w-10 text-neutral-600 mx-auto mb-3" />
+                <p className="text-neutral-400">No recent activity</p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Exams */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Recent Exams</CardTitle>
+          <Link to={ROUTES.INSTRUCTOR_EXAMS}>
+            <Button variant="ghost" size="sm">
+              View All
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {examsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-4 rounded-lg bg-primary-700/50">
+                  <Skeleton className="h-4 w-16 mb-2" />
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              ))}
+            </div>
+          ) : recentExams && recentExams.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recentExams.map((exam) => (
+                <Link
+                  key={exam.id}
+                  to={`${ROUTES.INSTRUCTOR_EXAMS}/${exam.id}`}
+                  className="p-4 rounded-lg bg-primary-700/50 hover:bg-primary-700 transition-colors block"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge
+                      variant={
+                        exam.status === 'published'
+                          ? 'success'
+                          : exam.status === 'draft'
+                          ? 'secondary'
+                          : 'warning'
+                      }
+                      className="text-xs"
+                    >
+                      {exam.status}
+                    </Badge>
+                  </div>
+                  <p className="font-medium text-neutral-100 mb-1">{exam.title}</p>
+                  <p className="text-sm text-neutral-400">{exam.course.code}</p>
+                  <div className="flex items-center gap-4 mt-2 text-xs text-neutral-500">
+                    <span>{exam.question_count} questions</span>
+                    <span>{exam.duration_minutes} min</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center">
+              <FileText className="h-10 w-10 text-neutral-600 mx-auto mb-3" />
+              <p className="text-neutral-400">No exams yet</p>
+              <p className="text-sm text-neutral-500">Create your first exam to get started</p>
+              <Link to={ROUTES.INSTRUCTOR_EXAMS}>
+                <Button className="mt-4">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Exam
+                </Button>
+              </Link>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card>
@@ -174,7 +355,7 @@ export default function InstructorDashboard() {
           </Button>
           <Button variant="secondary" asChild>
             <Link to={ROUTES.INSTRUCTOR_ANALYTICS}>
-              <Users className="mr-2 h-4 w-4" />
+              <TrendingUp className="mr-2 h-4 w-4" />
               View Analytics
             </Link>
           </Button>
