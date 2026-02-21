@@ -29,6 +29,7 @@ const StudentExamDetail = lazy(() => import('@/pages/student/ExamDetail'))
 const TakeExam = lazy(() => import('@/pages/student/TakeExam'))
 const StudentSubmissions = lazy(() => import('@/pages/student/Submissions'))
 const SubmissionReview = lazy(() => import('@/pages/student/SubmissionReview'))
+const SubmissionResults = lazy(() => import('@/pages/student/Results'))
 
 // Instructor pages
 const InstructorDashboard = lazy(() => import('@/pages/instructor/Dashboard'))
@@ -165,6 +166,10 @@ const router = createBrowserRouter([
       {
         path: 'submissions/:id/review',
         element: withSuspense(SubmissionReview),
+      },
+      {
+        path: 'submissions/:id/results',
+        element: withSuspense(SubmissionResults),
       },
       {
         path: 'profile',
