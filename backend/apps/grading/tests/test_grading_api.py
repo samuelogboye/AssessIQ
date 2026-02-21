@@ -2,6 +2,8 @@
 Tests for grading API endpoints.
 """
 
+from unittest.mock import patch
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -573,6 +575,3 @@ class TestGradingConfigurationValidation:
         response = client.post(url, data, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-from unittest.mock import patch

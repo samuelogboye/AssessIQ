@@ -2,7 +2,7 @@
 Production settings for AssessIQ project.
 """
 
-from .base import *
+from .base import BASE_DIR, CACHES, DATABASES, LOGGING, REST_FRAMEWORK, SPECTACULAR_SETTINGS, env
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False

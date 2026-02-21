@@ -2,7 +2,7 @@
 Testing settings for AssessIQ project.
 """
 
-from .base import *
+from .base import REST_FRAMEWORK
 
 # Use in-memory database for faster tests
 DATABASES = {

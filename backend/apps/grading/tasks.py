@@ -71,8 +71,13 @@ def grade_submission(self, submission_id):
         raise
 
     except Exception as exc:
-        logger.error(f"Error grading submission {submission_id}: {str(exc)}")
-        raise self.retry(exc=exc, countdown=60)
+        logger.error(
+            "Error grading submission %s: %s",
+            submission_id,
+            exc,
+            exc_info=True,
+        )
+        raise self.retry(exc=exc, countdown=60) from exc
 
 
 @shared_task(bind=True, max_retries=3)
@@ -120,8 +125,13 @@ def grade_answer(self, answer_id):
         raise
 
     except Exception as exc:
-        logger.error(f"Error grading answer {answer_id}: {str(exc)}")
-        raise self.retry(exc=exc, countdown=30)
+        logger.error(
+            "Error grading answer %s: %s",
+            answer_id,
+            exc,
+            exc_info=True,
+        )
+        raise self.retry(exc=exc, countdown=30) from exc
 
 
 @shared_task

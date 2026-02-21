@@ -2,7 +2,7 @@
 Development settings for AssessIQ project.
 """
 
-from .base import *
+from .base import INSTALLED_APPS, MIDDLEWARE
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
