@@ -318,10 +318,10 @@ function QuestionDisplay({
             <span className="text-sm text-neutral-500">
               Question {questionNumber} of {totalQuestions}
             </span>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="default" className="text-xs">
               {getQuestionTypeLabel()}
             </Badge>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="default" className="text-xs">
               {question.marks} {question.marks === 1 ? 'mark' : 'marks'}
             </Badge>
           </div>
@@ -435,7 +435,7 @@ function SubmitReviewModal({
 
 // Main Component
 export default function TakeExam() {
-  const { id, submissionId } = useParams<{ id: string; submissionId: string }>()
+  const { submissionId } = useParams<{ id: string; submissionId: string }>()
   const navigate = useNavigate()
 
   const [currentIndex, setCurrentIndex] = useState(0)
