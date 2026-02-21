@@ -7,7 +7,7 @@ django-environ==0.11.2
 psycopg[binary]
 
 # Authentication
-djangorestframework-simplejwt==5.3.1
+djangorestframework-simplejwt==5.5.1
 
 # CORS handling
 django-cors-headers==4.9.0
