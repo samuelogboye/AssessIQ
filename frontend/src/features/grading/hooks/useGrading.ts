@@ -113,7 +113,7 @@ export function useGradeAnswer() {
     mutationFn: ({ answerId, score, feedback }: { answerId: number; score: number; feedback?: string }) =>
       submissionsApi.gradeAnswer(answerId, { score, feedback }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: gradingKeys.answers(0) })
+      queryClient.invalidateQueries({ queryKey: gradingKeys.all })
       toast.success('Answer graded')
     },
     onError: (error) => toast.error(getErrorMessage(error)),
