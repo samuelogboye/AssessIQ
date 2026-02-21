@@ -3,7 +3,30 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const Modal = DialogPrimitive.Root
+type SimpleModalProps = {
+  isOpen: boolean
+  onClose: () => void
+  title?: string
+  children: React.ReactNode
+}
+
+const Modal = ({ isOpen, onClose, title, children }: SimpleModalProps) => (
+  <DialogPrimitive.Root
+    open={isOpen}
+    onOpenChange={(open) => {
+      if (!open) onClose()
+    }}
+  >
+    <ModalContent>
+      {title && (
+        <ModalHeader>
+          <ModalTitle>{title}</ModalTitle>
+        </ModalHeader>
+      )}
+      {children}
+    </ModalContent>
+  </DialogPrimitive.Root>
+)
 
 const ModalTrigger = DialogPrimitive.Trigger
 
