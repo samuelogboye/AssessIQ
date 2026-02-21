@@ -504,7 +504,7 @@ class GradingConfigurationViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         submission_ids = serializer.validated_data["submission_ids"]
-        force_regrade = serializer.validated_data.get("force_regrade", False)
+        serializer.validated_data.get("force_regrade", False)
 
         # Validate user has access to these submissions
         from apps.submissions.models import Submission

@@ -219,7 +219,7 @@ class TestSubmissionAPI:
     def test_list_submissions_as_student(self, api_client, student, another_student, exam):
         """Test student only sees their own submissions."""
         sub1 = Submission.objects.create(student=student, exam=exam, attempt_number=1)
-        sub2 = Submission.objects.create(student=another_student, exam=exam, attempt_number=1)
+        Submission.objects.create(student=another_student, exam=exam, attempt_number=1)
 
         api_client.force_authenticate(user=student)
         url = reverse("submissions:submission-list")

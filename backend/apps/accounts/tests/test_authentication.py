@@ -98,6 +98,9 @@ class TestUserLogin:
             email="student@test.com", password="TestPass123!", role="student"
         )
 
+        user.is_verified = True
+        user.save()
+
         client = APIClient()
         url = reverse("login")
         data = {"email": "student@test.com", "password": "TestPass123!"}

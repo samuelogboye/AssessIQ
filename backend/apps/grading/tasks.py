@@ -105,7 +105,7 @@ def grade_answer(self, answer_id):
 
         # If auto-grading not applicable, use grading service
         grading_service = GradingService.get_service(answer.question)
-        result = grading_service.grade(answer)
+        grading_service.grade(answer)
 
         logger.info(f"AI-graded answer {answer_id}")
         return {

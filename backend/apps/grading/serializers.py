@@ -137,7 +137,7 @@ class GradingConfigurationSerializer(serializers.ModelSerializer):
 
         if "temperature" in config:
             temp = config["temperature"]
-            if not isinstance(temp, (int, float)) or not (0 <= temp <= 2):
+            if not isinstance(temp, int | float) or not (0 <= temp <= 2):
                 raise serializers.ValidationError(
                     {"service_config": "Temperature must be between 0 and 2"}
                 )
@@ -160,7 +160,7 @@ class GradingConfigurationSerializer(serializers.ModelSerializer):
 
         if "temperature" in config:
             temp = config["temperature"]
-            if not isinstance(temp, (int, float)) or not (0 <= temp <= 1):
+            if not isinstance(temp, int | float) or not (0 <= temp <= 1):
                 raise serializers.ValidationError(
                     {"service_config": "Temperature must be between 0 and 1 for Claude"}
                 )
@@ -178,7 +178,7 @@ class GradingConfigurationSerializer(serializers.ModelSerializer):
 
         if "temperature" in config:
             temp = config["temperature"]
-            if not isinstance(temp, (int, float)) or not (0 <= temp <= 2):
+            if not isinstance(temp, int | float) or not (0 <= temp <= 2):
                 raise serializers.ValidationError(
                     {"service_config": "Temperature must be between 0 and 2"}
                 )
