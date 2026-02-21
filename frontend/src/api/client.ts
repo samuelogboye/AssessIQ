@@ -60,6 +60,10 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = []
 }
 
+const notifySessionExpired = () => {
+  window.dispatchEvent(new CustomEvent('auth:expired'))
+}
+
 // Auth endpoints that should NOT trigger token refresh on 401
 const AUTH_ENDPOINTS = [
   '/auth/login/',
@@ -112,6 +116,7 @@ apiClient.interceptors.response.use(
 
     if (!refreshToken) {
       tokenStorage.clearTokens()
+      notifySessionExpired()
       // Don't redirect here - let the ProtectedRoute handle it
       return Promise.reject(error)
     }
@@ -134,6 +139,7 @@ apiClient.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError as Error, null)
       tokenStorage.clearTokens()
+      notifySessionExpired()
       // Don't redirect here - let the ProtectedRoute handle it
       return Promise.reject(refreshError)
     } finally {
