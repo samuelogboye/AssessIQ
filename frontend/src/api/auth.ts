@@ -19,6 +19,7 @@ export const authApi = {
   // Login
   login: async (data: LoginRequest): Promise<LoginResponse> => {
     const response = await apiClient.post<LoginResponse>('/auth/login/', data)
+    console.log("Login API response data:", response.data)
     const { access, refresh } = response.data
     tokenStorage.setTokens(access, refresh)
     return response.data

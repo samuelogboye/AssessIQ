@@ -60,6 +60,21 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = []
 }
 
+// Auth endpoints that should NOT trigger token refresh on 401
+const AUTH_ENDPOINTS = [
+  '/auth/login/',
+  '/auth/register/',
+  '/auth/token/',
+  '/auth/token/refresh/',
+  '/auth/password-reset/',
+  '/auth/verify-email/',
+]
+
+const isAuthEndpoint = (url: string | undefined): boolean => {
+  if (!url) return false
+  return AUTH_ENDPOINTS.some((endpoint) => url.includes(endpoint))
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -67,6 +82,12 @@ apiClient.interceptors.response.use(
 
     // If error is not 401 or request already retried, reject
     if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error)
+    }
+
+    // Don't try to refresh tokens for auth endpoints (login, register, etc.)
+    // These 401s are legitimate authentication failures, not expired tokens
+    if (isAuthEndpoint(originalRequest.url)) {
       return Promise.reject(error)
     }
 
@@ -91,7 +112,7 @@ apiClient.interceptors.response.use(
 
     if (!refreshToken) {
       tokenStorage.clearTokens()
-      window.location.href = '/login'
+      // Don't redirect here - let the ProtectedRoute handle it
       return Promise.reject(error)
     }
 
@@ -113,7 +134,7 @@ apiClient.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError as Error, null)
       tokenStorage.clearTokens()
-      window.location.href = '/login'
+      // Don't redirect here - let the ProtectedRoute handle it
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false
