@@ -215,13 +215,16 @@ function ShortAnswer({
   onChange: (value: string) => void
 }) {
   return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="Type your answer here..."
-      className="w-full px-4 py-3 bg-primary-700 border border-primary-600 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-accent"
-    />
+    <div className="space-y-2">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Type your answer here..."
+        className="w-full px-4 py-3 bg-primary-700 border border-primary-600 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-accent"
+      />
+      <div className="text-xs text-neutral-500 text-right">{value.length} characters</div>
+    </div>
   )
 }
 
@@ -244,7 +247,10 @@ function EssayAnswer({
         rows={10}
         className="w-full px-4 py-3 bg-primary-700 border border-primary-600 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-accent resize-y"
       />
-      <div className="text-sm text-neutral-500 text-right">{wordCount} words</div>
+      <div className="flex items-center justify-between text-sm text-neutral-500">
+        <span>Tip: Structure your response with clear points.</span>
+        <span>{wordCount} words</span>
+      </div>
     </div>
   )
 }
@@ -436,15 +442,51 @@ export default function TakeExam() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [flagged, setFlagged] = useState<Set<number>>(new Set())
   const [showSubmitModal, setShowSubmitModal] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null)
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'queued' | null>(null)
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine)
+  const [showNav, setShowNav] = useState(false)
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastSavedRef = useRef<Record<number, string>>({})
+  const pendingQueueRef = useRef<Record<number, string>>({})
 
   const { data: submission, isLoading } = useSubmissionDetail(Number(submissionId))
   const { data: savedAnswers } = useSubmissionAnswers(Number(submissionId))
   const saveAnswer = useSaveAnswer(Number(submissionId))
   const submitExam = useSubmitExam(Number(submissionId))
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
+  useEffect(() => {
+    const flushPending = async () => {
+      const pendingEntries = Object.entries(pendingQueueRef.current)
+      if (!isOnline || pendingEntries.length === 0) return
+      for (const [questionId, answerText] of pendingEntries) {
+        try {
+          await saveAnswer.mutateAsync({
+            question_id: Number(questionId),
+            answer_text: answerText,
+          })
+          lastSavedRef.current[Number(questionId)] = answerText
+          delete pendingQueueRef.current[Number(questionId)]
+          setSaveStatus('saved')
+          setTimeout(() => setSaveStatus(null), 2000)
+        } catch {
+          setSaveStatus('error')
+        }
+      }
+    }
+    flushPending()
+  }, [isOnline, saveAnswer])
+
 
   // Get questions from submission data
   // Questions can come from submission.questions or submission.exam.questions
@@ -476,6 +518,11 @@ export default function TakeExam() {
 
       saveTimeoutRef.current = setTimeout(async () => {
         if (value !== lastSavedRef.current[questionId]) {
+          if (!isOnline) {
+            pendingQueueRef.current[questionId] = value
+            setSaveStatus('queued')
+            return
+          }
           setSaveStatus('saving')
           try {
             await saveAnswer.mutateAsync({ question_id: questionId, answer_text: value })
@@ -488,7 +535,7 @@ export default function TakeExam() {
         }
       }, 1500)
     },
-    [saveAnswer]
+    [isOnline, saveAnswer]
   )
 
   // Handle time up
@@ -506,7 +553,7 @@ export default function TakeExam() {
 
     try {
       await submitExam.mutateAsync({ answers: answersArray })
-      navigate(`/student/submissions/${submissionId}/review`)
+      navigate(`/student/submissions/${submissionId}/results`)
     } catch {
       // Error handled by mutation
     }
@@ -553,7 +600,7 @@ export default function TakeExam() {
             <p className="text-neutral-400 mb-4">
               This exam has already been submitted. You can view your results.
             </p>
-            <Button onClick={() => navigate(`/student/submissions/${submissionId}/review`)}>
+            <Button onClick={() => navigate(`/student/submissions/${submissionId}/results`)}>
               View Results
             </Button>
           </CardContent>
@@ -625,6 +672,9 @@ export default function TakeExam() {
                     <span className="text-success">Saved</span>
                   </>
                 )}
+                {saveStatus === 'queued' && (
+                  <span className="text-warning">Offline - queued</span>
+                )}
                 {saveStatus === 'error' && (
                   <span className="text-error">Save failed</span>
                 )}
@@ -646,10 +696,24 @@ export default function TakeExam() {
       {/* Main Content */}
       <main className="pt-20 pb-24">
         <div className="max-w-7xl mx-auto px-4">
+          {!isOnline && (
+            <div className="mb-4 p-3 bg-warning/10 border border-warning/30 rounded-lg text-warning text-sm">
+              You are offline. Answers will be queued and synced when you reconnect.
+            </div>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Question Navigation - Sidebar */}
             <div className="lg:col-span-1 order-2 lg:order-1">
-              <Card className="sticky top-24">
+              <div className="lg:hidden mb-3">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowNav((prev) => !prev)}
+                  className="w-full"
+                >
+                  {showNav ? 'Hide Questions' : 'Show Questions'}
+                </Button>
+              </div>
+              <Card className={cn('sticky top-24', !showNav && 'hidden lg:block')}>
                 <CardContent className="p-4">
                   <h3 className="font-medium text-neutral-100 mb-4">Questions</h3>
                   <QuestionNav
