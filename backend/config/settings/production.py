@@ -2,16 +2,16 @@
 Production settings for AssessIQ project.
 """
 
-from .base import BASE_DIR, CACHES, DATABASES, LOGGING, REST_FRAMEWORK, SPECTACULAR_SETTINGS, env
+from .base import *  # noqa: F403
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 # Hosts configuration
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[]) # noqa: F405
 
 # CORS Settings for production
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[]) # noqa: F405
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 CORS_ALLOW_HEADERS = [
@@ -27,7 +27,7 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Security Settings
-SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True) # noqa: F405
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
@@ -64,7 +64,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # Sentry for error tracking
-SENTRY_DSN = env("SENTRY_DSN", default="")
+SENTRY_DSN = env("SENTRY_DSN", default="") # noqa: F405
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.celery import CeleryIntegration
@@ -78,24 +78,24 @@ if SENTRY_DSN:
         ],
         traces_sample_rate=0.1,
         send_default_pii=False,
-        environment=env("ENVIRONMENT", default="production"),
+        environment=env("ENVIRONMENT", default="production"), # noqa: F405
     )
 
 # Logging to JSON for production
-LOGGING["formatters"]["default"] = LOGGING["formatters"]["json"]
-LOGGING["handlers"]["console"]["formatter"] = "json"
+LOGGING["formatters"]["default"] = LOGGING["formatters"]["json"] # noqa: F405
+LOGGING["handlers"]["console"]["formatter"] = "json" # noqa: F405
 
 # Database connection pooling for production
-DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=600)  # 10 minutes
-DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
-DATABASES["default"]["OPTIONS"] = {
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=600)  # 10 minutes # noqa: F405
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True # noqa: F405
+DATABASES["default"]["OPTIONS"] = { # noqa: F405
     "connect_timeout": 10,
     "options": "-c statement_timeout=30000",  # 30 seconds
 }
 
 # Cache configuration for production
-CACHES["default"]["TIMEOUT"] = 300  # 5 minutes default
-CACHES["default"]["OPTIONS"] = {
+CACHES["default"]["TIMEOUT"] = 300  # 5 minutes default # noqa: F405
+CACHES["default"]["OPTIONS"] = { # noqa: F405
     "CLIENT_CLASS": "django_redis.client.DefaultClient",
     "CONNECTION_POOL_KWARGS": {
         "max_connections": 50,
@@ -106,14 +106,14 @@ CACHES["default"]["OPTIONS"] = {
 }
 
 # Enhanced rate limiting for production
-REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
-    "anon": env("ANON_RATE_LIMIT", default="100/hour"),
-    "user": env("USER_RATE_LIMIT", default="1000/hour"),
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = { # noqa: F405
+    "anon": env("ANON_RATE_LIMIT", default="100/hour"), # noqa: F405
+    "user": env("USER_RATE_LIMIT", default="1000/hour"), # noqa: F405
     "burst": "60/minute",  # Burst rate limit for rapid requests
 }
 
 # Admin site security
-ADMIN_URL = env("ADMIN_URL", default="admin/")  # Custom admin URL for security
+ADMIN_URL = env("ADMIN_URL", default="admin/")  # Custom admin URL for security  # noqa: F405
 
 # File upload security
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
@@ -153,11 +153,11 @@ CELERY_BROKER_CONNECTION_RETRY = True
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
 
 # Media files configuration for production
-MEDIA_URL = env("MEDIA_URL", default="/media/")
-MEDIA_ROOT = env("MEDIA_ROOT", default=str(BASE_DIR / "media"))
+MEDIA_URL = env("MEDIA_URL", default="/media/")  # noqa: F405
+MEDIA_ROOT = env("MEDIA_ROOT", default=str(BASE_DIR / "media"))  # noqa: F405
 
 # API Documentation - Disable in production for security
-SPECTACULAR_SETTINGS["SERVE_INCLUDE_SCHEMA"] = env.bool("SERVE_SCHEMA", default=False)
+SPECTACULAR_SETTINGS["SERVE_INCLUDE_SCHEMA"] = env.bool("SERVE_SCHEMA", default=False)  # noqa: F405
 
 # Additional security headers
 SECURE_REFERRER_POLICY = "same-origin"

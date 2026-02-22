@@ -2,7 +2,7 @@
 Development settings for AssessIQ project.
 """
 
-from .base import INSTALLED_APPS, MIDDLEWARE
+from .base import *  # noqa: F403
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -14,11 +14,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Add debug toolbar for development
-INSTALLED_APPS += [
+INSTALLED_APPS += [ # noqa: F405
     "debug_toolbar",
 ]
 
-MIDDLEWARE += [
+MIDDLEWARE += [ # noqa: F405
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
