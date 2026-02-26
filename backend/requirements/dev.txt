@@ -6,7 +6,7 @@ isort==5.13.2
 ruff==0.14.13
 mypy==1.10.0
 django-stubs==5.2.8
-djangorestframework-stubs==3.16.6
+djangorestframework-stubs==3.16.8
 
 # Testing
 pytest==9.0.2
