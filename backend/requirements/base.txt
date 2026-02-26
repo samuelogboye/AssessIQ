@@ -17,7 +17,7 @@ drf-spectacular==0.29.0
 
 # Async task processing
 celery==5.6.2
-redis==7.1.0
+redis==7.2.1
 
 # Security
 django-ratelimit==4.1.0
